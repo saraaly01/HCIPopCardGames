@@ -83,6 +83,7 @@ def main():
     losses = 0
     keepPlaying = True
 
+    #rebecca_card_dir = "C:\\Users\\btoth\\Desktop\\Fall_2022\\HCI\\HCIPopCardGames\\cards\\cards"
     crd = {"2 of Diamonds": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\2_of_diamonds.png",
            "2 of Hearts": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\2_of_hearts.png",
            "2 of Clubs": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\2_of_clubs.png",
