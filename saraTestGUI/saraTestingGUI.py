@@ -41,7 +41,6 @@ def cardTie(player_hand, computer_hand, root):
     cardPlayedCTie  = []
     playerX = .22
     computerX = .7
-
     for i in range(4):
         if player_hand.size != 0:
             cardPlayedP = player_hand.random_card(remove = True)
@@ -56,14 +55,17 @@ def cardTie(player_hand, computer_hand, root):
             img= insertImage(cardPlayedC,root)
             img.place(relx = computerX - (.05 *i), rely = .3)
             labels.append(img)
-  
+    
     #root.update()
     valueCompareTie = compareCards(str(cardPlayedPTie[len(cardPlayedPTie) - 1]), str(cardPlayedCTie[len(cardPlayedCTie) - 1]))
     if valueCompareTie == 0: # cards are equal 
+        tie = Label(root, text= "TIE, CARDS BACK!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
+        tie.place(relx =.45, rely = .2)
         for cardP in cardPlayedPTie:
             player_hand.add(cardP)
         for cardC in cardPlayedCTie:
             computer_hand.add(cardC)
+        tie.destroy()
     elif valueCompareTie == 1:
         for cardP in cardPlayedPTie:
             player_hand.add(cardP)
@@ -74,8 +76,9 @@ def cardTie(player_hand, computer_hand, root):
             computer_hand.add(cardP)
         for cardC in cardPlayedCTie:
             computer_hand.add(cardC)
+    
 
-    return player_hand, computer_hand, labels
+    return player_hand, computer_hand, labels, valueCompareTie
 
 def insertImage(cardPlayed,root):
     cardOutput = Image.open("cards\\" + str(cardPlayed) + ".png")
@@ -88,6 +91,7 @@ def insertImage(cardPlayed,root):
 
 def intialize(rootIN):
     labels = []
+    valueCompare = -1
     deck = pydealer.Deck()
     deck.shuffle()
 
@@ -135,10 +139,9 @@ def intialize(rootIN):
     flip = Button(root, text ="PLAY CARD", command=lambda: var.set(1))
     flip.place(relx=.45, rely = .8)
 
-
+    
     while True:
 
-        #root.update()
         root.wait_variable(var)
         playerNumCards = Label(cardBackPlayer, text = str(player_hand.size), font=("Comic Sans MS", 20))
         playerNumCards.place(relx= 0, rely=.0)
@@ -146,13 +149,19 @@ def intialize(rootIN):
         computerNumCards.place(relx= 0, rely=0)
         for label in labels:
             label.destroy()
-        #time.sleep(.25)
+
         if player_hand.size == 0:
             break
         elif computer_hand.size == 0:
             break
+        #if valueCompare == 0:
+         #   tie.destroy()
+        if valueCompare == 1:
+            playerWin.destroy()
+        elif valueCompare == 2:
+            computerWin.destroy()
+
         
-        #root.update()
         computer_hand.shuffle()
         player_hand.shuffle()
         cardPlayedP = player_hand.random_card(remove = True)
@@ -165,21 +174,26 @@ def intialize(rootIN):
         valueCompare = compareCards(str(cardPlayedP), str(cardPlayedC))
 
         if valueCompare == 0: # cards are equal 
-            #1 2 3 and then flip 
-            computer_hand.add(cardPlayedC)
-            player_hand.add(cardPlayedP)
-            player_hand, computer_hand, labels = cardTie(player_hand, computer_hand,root)
+            tie = Label(root, text= "TIE, WAR!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
+            tie.place(relx =.45, rely = .2)
+            flip.config(text = "WAR!")
+            root.wait_variable(var)
+            tie.destroy()
+            player_hand, computer_hand, labels, valueCompare = cardTie(player_hand, computer_hand,root)
+            flip.config(text = "PLAY CARD")
 
-        elif valueCompare == 1:
-            #print(str(cardPlayedP), "is greater than", str(cardPlayedC))
+        if valueCompare == 1:
+            playerWin = Label(root, text= "PLAYER's WIN!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
+            playerWin.place(relx =.15, rely = .2)
             player_hand.add(cardPlayedC)
             player_hand.add(cardPlayedP)
-        elif valueCompare == 2:
-            #print(str(cardPlayedC),"is greater than", str(cardPlayedP))
+        elif valueCompare == 2: #computer won the card
+            computerWin = Label(root, text= "COMPUTER's WIN!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
+            computerWin.place(relx =.65, rely = .2)
             computer_hand.add(cardPlayedC)
             computer_hand.add(cardPlayedP)
 
-        print( str(player_hand.size),  str(computer_hand.size))
+
 
     root.destroy()
     return
