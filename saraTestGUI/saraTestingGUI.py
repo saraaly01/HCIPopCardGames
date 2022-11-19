@@ -139,40 +139,49 @@ def intialize(rootIN):
     flip = Button(root, text ="PLAY CARD", command=lambda: var.set(1))
     flip.place(relx=.45, rely = .8)
 
-    
-    while True:
-
+    start = 1
+    while True:   
+        computer_hand.shuffle()
+        player_hand.shuffle()
+        flip.config(text = "PLAY CARD")
+        if not start:
+            imgPlayedP.destroy()
+            imgPlayedC.destroy()
+            if valueCompare == 1:
+                playerWin.destroy()
+            else:
+                computerWin.destroy()
+            for label in labels:
+                label.destroy()
+      
         root.wait_variable(var)
+        start = 0
+        playerNumCards.destroy()
+        computerNumCards.destroy()
+
         playerNumCards = Label(cardBackPlayer, text = str(player_hand.size), font=("Comic Sans MS", 20))
         playerNumCards.place(relx= 0, rely=.0)
+      
         computerNumCards = Label(cardBackComputer, text = str(computer_hand.size), font=("Comic Sans MS", 20))
         computerNumCards.place(relx= 0, rely=0)
-        for label in labels:
-            label.destroy()
+        
+     
+
 
         if player_hand.size == 0:
             break
         elif computer_hand.size == 0:
             break
-        #if valueCompare == 0:
-         #   tie.destroy()
-        if valueCompare == 1:
-            playerWin.destroy()
-        elif valueCompare == 2:
-            computerWin.destroy()
 
-        
-        computer_hand.shuffle()
-        player_hand.shuffle()
-        cardPlayedP = player_hand.random_card(remove = True)
+
         cardPlayedC = computer_hand.random_card(remove = True)
-        imgPlayedP = insertImage(cardPlayedP,root)
-        imgPlayedP.place(relx=0.12, rely=.3) 
         imgPlayedC = insertImage(cardPlayedC,root)
         imgPlayedC.place(relx=0.8, rely=.3) 
+        cardPlayedP = player_hand.random_card(remove = True)
+        imgPlayedP = insertImage(cardPlayedP,root)
+        imgPlayedP.place(relx=0.12, rely=.3) 
 
         valueCompare = compareCards(str(cardPlayedP), str(cardPlayedC))
-
         if valueCompare == 0: # cards are equal 
             tie = Label(root, text= "TIE, WAR!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
             tie.place(relx =.45, rely = .2)
@@ -192,8 +201,10 @@ def intialize(rootIN):
             computerWin.place(relx =.65, rely = .2)
             computer_hand.add(cardPlayedC)
             computer_hand.add(cardPlayedP)
+        flip.config(text = "CONTINUE")
+        root.wait_variable(var)
 
-
+        
 
     root.destroy()
     return

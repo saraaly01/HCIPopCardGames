@@ -2,7 +2,6 @@ from tkinter import *
 from PIL import Image, ImageTk
 from saraTestingGUI import *
 import pydealer
-# width of window
 
 def start():
     intialize(root)
@@ -11,9 +10,8 @@ def start():
 root = Tk()
 root.title('INSTRUCTIONS')
 root['background']='#8B0000'
-window_width = root.winfo_screenwidth()
-window_height= root.winfo_screenheight()
-root.geometry("%dx%d" % (window_width,  window_height))
+
+root.geometry("200x200")
 submit = Button(root, text ="PLAY WAR", command = start)
-submit.grid()
+submit.place(relx = .42, rely = .5)
 root.mainloop()
