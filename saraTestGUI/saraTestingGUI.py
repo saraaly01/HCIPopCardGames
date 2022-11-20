@@ -35,7 +35,7 @@ def compareCards(card1, card2): #return 1 if card1 greater, return 2 if card2 gr
     elif int(cardTwo) > int(cardOne):
         return 2
 
-def cardTie(player_hand, computer_hand, root):
+def cardTie(player_hand, computer_hand, root, var):
     labels = []
     cardPlayedPTie = []
     cardPlayedCTie  = []
@@ -57,10 +57,11 @@ def cardTie(player_hand, computer_hand, root):
             labels.append(img)
     
     #root.update()
-    valueCompareTie = compareCards(str(cardPlayedPTie[len(cardPlayedPTie) - 1]), str(cardPlayedCTie[len(cardPlayedCTie) - 1]))
+    valueCompareTie = compareCards(str(cardPlayedP), str(cardPlayedC))
     if valueCompareTie == 0: # cards are equal 
         tie = Label(root, text= "TIE, CARDS BACK!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
         tie.place(relx =.45, rely = .2)
+        root.wait_variable(var)
         for cardP in cardPlayedPTie:
             player_hand.add(cardP)
         for cardC in cardPlayedCTie:
@@ -167,11 +168,20 @@ def intialize(rootIN):
         
      
 
-
+        
         if player_hand.size == 0:
+            playerWinsGame = Label(root, text = "COMPUTER WINS. GAME OVER", font=("Comic Sans MS", 40))
+            playerWinsGame.place(relx= .4, rely=.6)
+            flip.config(text = "END")
+            root.wait_variable(var)
             break
         elif computer_hand.size == 0:
+            computerWinsGame = Label(root, text = "PLAYER WINS. GAME OVER", font=("Comic Sans MS", 40))
+            computerWinsGame.place(relx= .4, rely=.6)
+            flip.config(text = "END")
+            root.wait_variable(var)
             break
+
 
 
         cardPlayedC = computer_hand.random_card(remove = True)
@@ -188,8 +198,12 @@ def intialize(rootIN):
             flip.config(text = "WAR!")
             root.wait_variable(var)
             tie.destroy()
-            player_hand, computer_hand, labels, valueCompare = cardTie(player_hand, computer_hand,root)
+            flip.config(text = "CONTINUE") 
+            player_hand, computer_hand, labels, valueCompare = cardTie(player_hand, computer_hand,root, var)
             flip.config(text = "PLAY CARD")
+            if valueCompare == 0:
+                player_hand.add(cardPlayedP)
+                computer_hand.add(cardPlayedC)
 
         if valueCompare == 1:
             playerWin = Label(root, text= "PLAYER's WIN!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
@@ -201,6 +215,7 @@ def intialize(rootIN):
             computerWin.place(relx =.65, rely = .2)
             computer_hand.add(cardPlayedC)
             computer_hand.add(cardPlayedP)
+    
         flip.config(text = "CONTINUE")
         root.wait_variable(var)
 

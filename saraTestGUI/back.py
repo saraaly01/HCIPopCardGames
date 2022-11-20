@@ -8,7 +8,7 @@ def start():
 
 
 root = Tk()
-root.title('INSTRUCTIONS')
+root.title('PLAY')
 root['background']='#8B0000'
 
 root.geometry("200x200")
