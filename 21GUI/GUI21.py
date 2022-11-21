@@ -96,6 +96,7 @@ def finish():
 
 def main(rootIN):
     global root, dealer_hand, player_hand, deck, xDealer, xPlayer, hitButton, flippedCard
+    deck.shuffle()
 
     keepPlaying = True
     root = Toplevel(rootIN)

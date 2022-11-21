@@ -1,3 +1,5 @@
+#code with back.py creates WAR GUI
+
 from tkinter import *
 from PIL import Image, ImageTk
 import time
@@ -5,12 +7,16 @@ import pydealer
 
 width = int(250/2.5)
 height = int(363/2.5)
-def compareCards(card1, card2): #return 1 if card1 greater, return 2 if card2 greater, return 0 if tie
+def compareCards(card1, card2): 
+    #function takes two cards and compares their numerical value
+    #return 1 if card1 greater, return 2 if card2 greater, return 0 if tie
     cardOne = card1.split()
+    #card come in as a string like "9 of Spades" we split it so we can get the number only
+    #number only matters in war, not suit
     cardOne = cardOne[0]
     cardTwo = card2.split()
     cardTwo = cardTwo[0]
-    if cardOne == cardTwo:
+    if cardOne == cardTwo:  #tie, returns 0
         return 0
     match cardOne:
         case "Ace":
@@ -30,18 +36,22 @@ def compareCards(card1, card2): #return 1 if card1 greater, return 2 if card2 gr
             cardTwo = 12
         case "Jack":
             cardTwo = 11
-    if int(cardOne) > int(cardTwo):
+    if int(cardOne) > int(cardTwo): #players value is higher, returns 1
         return 1
-    elif int(cardTwo) > int(cardOne):
+    elif int(cardTwo) > int(cardOne): #computers value is higher, returns 2
         return 2
 
 def cardTie(player_hand, computer_hand, root, var):
-    labels = []
-    cardPlayedPTie = []
-    cardPlayedCTie  = []
-    playerX = .22
-    computerX = .7
-    for i in range(4):
+    #function handles a tie in war
+    labels = []  #array keeps track of tkinter labels made for tie so we can delete them from GUI after tie has been handeled 
+    cardPlayedPTie = [] #array keeps track of all cards played in tie for the player 
+    cardPlayedCTie  = [] #array keeps track of all cards played in tie for the computer
+    playerX = .22 #x value for placing cards on the players side (left side of screen)
+    computerX = .7 #x value for placing cards on the computers side (right side of screen)
+
+    for i in range(4): 
+        #in a tie, four cards should be placed, with the fourth card being the one you compare to
+        #if player/computer hand is less than 4 
         if player_hand.size != 0:
             cardPlayedP = player_hand.random_card(remove = True)
             cardPlayedPTie.append(cardPlayedP)

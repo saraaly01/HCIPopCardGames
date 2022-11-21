@@ -5,14 +5,14 @@ from gtts import gTTS
 import time
 import os
 import speech_recognition as sr
+from PyQt5 import QtCore, QtGui, QtWidgets
 
-mode = ""
 answer = ""
 
 r = sr.Recognizer()
 # r.adjust_for_ambient_noise(source, duration=1)
 mic = sr.Microphone()
-
+#keepPlaying = True
 playAgain = ""
 
 
@@ -61,9 +61,17 @@ def hand_score(x):
                     mylist.append(11)
             else:
                 mylist.append(10)
+
     score = 0
     for i in mylist:
         score += i
+    if score > 21:
+        if 11 in mylist:
+            mylist.remove(11)
+            mylist.append(1)
+            score = 0
+            for i in mylist:
+                score += i
     return score
 
 
@@ -82,6 +90,7 @@ def main():
     wins = 0
     losses = 0
     keepPlaying = True
+
     crd = {"2 of Diamonds": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\2_of_diamonds.png",
            "2 of Hearts": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\2_of_hearts.png",
            "2 of Clubs": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\2_of_clubs.png",
@@ -135,6 +144,7 @@ def main():
            "Ace of Clubs": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\ace_of_clubs.png",
            "Ace of Spades": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\ace_of_spades.png",
            }
+
     while True:
         speak("Hello, would you like to play this game using keyboard or voice?","dh")
         time.sleep(5)
@@ -156,8 +166,8 @@ def main():
         deck = pydealer.Deck()
         deck.shuffle()
         player_hand = pydealer.Stack()
-        #player_hand+=deck.get("10 of Spades")
-        #player_hand+=deck.get("10 of Hearts")
+        #player_hand+=deck.get("Ace of Spades")
+        #player_hand+=deck.get("9 of Hearts")
         dealer_hand = pydealer.Stack()
         dealer_hand += deck.deal(1)
         dealerArrays = np.array(cv2.imread(crd[str(dealer_hand[-1])]))
@@ -447,4 +457,3 @@ def main():
 
                 break
 
-main()
