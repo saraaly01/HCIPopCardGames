@@ -63,91 +63,50 @@ def hand_score(x):
         score += i
     return score
 
+def play21(rootIN):
+    while keepPlaying:
+        deck = pydealer.Deck()
+        deck.shuffle()
 
-while keepPlaying:
-    deck = pydealer.Deck()
-    deck.shuffle()
-
-    player_hand = pydealer.Stack()
-    dealer_hand = pydealer.Stack()
-    dealer_hand += deck.deal(1)
-    player_hand += deck.deal(2)
-
-    while True:
-        print("dealer hand: ")
-        print(dealer_hand)
-        print("dealer hand value: " + str(hand_score(dealer_hand)))
-        print("player hand: ")
-        print(player_hand)
-        print("player hand value: " + str(hand_score(player_hand)))
-        greet="dealer has "
-        for i in dealer_hand:
-            greet+=str(i)
-        speak(greet,"dh")
-        time.sleep(5)
-        speak("Dealer hand score is "+str(hand_score(dealer_hand)),"dh")
-        time.sleep(5)
-        if hand_score(player_hand) >= 22:
-            losses += 1
-
-            print('wins:', wins, '\nlosses:', losses)
-            speak("Player bust, You have "+str(wins)+" wins and "+str(losses)+" losses","ph")
-            time.sleep(5)
-            while True:
-                speak("Would you like to play another game, Yes or No?", "ph")
-                time.sleep(5)
-                playAgain=recognize()
-
-                if playAgain.find('yes') == -1 and playAgain.find('no') == -1:
-                    continue
-                else:
-                    if playAgain.find('no') != -1:
-                        keepPlaying=False
-                break
-            break
+        player_hand = pydealer.Stack()
+        dealer_hand = pydealer.Stack()
+        dealer_hand += deck.deal(1)
+        player_hand += deck.deal(2)
 
         while True:
-            greet = "you have "
-            for i in player_hand:
-                greet += str(i)
-            speak(greet, "dh")
+            print("dealer hand: ")
+            print(dealer_hand)
+            print("dealer hand value: " + str(hand_score(dealer_hand)))
+            print("player hand: ")
+            print(player_hand)
+            print("player hand value: " + str(hand_score(player_hand)))
+            greet="dealer has "
+            for i in dealer_hand:
+                greet+=str(i)
+            speak(greet,"dh")
             time.sleep(5)
-            speak("Your hand score is " + str(hand_score(player_hand)), "dh")
+            speak("Dealer hand score is "+str(hand_score(dealer_hand)),"dh")
             time.sleep(5)
-            speak("Please choose: Hit or Stand","dh")
-            time.sleep(5)
-            answer = recognize()
+            if hand_score(player_hand) >= 22:
+                losses += 1
 
-            if answer.find('hit') == -1 and answer.find('stand') == -1:
-                continue
+                print('wins:', wins, '\nlosses:', losses)
+                speak("Player bust, You have "+str(wins)+" wins and "+str(losses)+" losses","ph")
+                time.sleep(5)
+                while True:
+                    speak("Would you like to play another game, Yes or No?", "ph")
+                    time.sleep(5)
+                    playAgain=recognize()
 
-            else:
-                if answer.find('hit') != -1:
-                    answer='hit'
-                elif answer.find('stand') != -1:
-                    answer='stand'
+                    if playAgain.find('yes') == -1 and playAgain.find('no') == -1:
+                        continue
+                    else:
+                        if playAgain.find('no') != -1:
+                            keepPlaying=False
+                    break
                 break
 
-        if answer == 'hit':
-            player_hand += deck.deal(1)
-            continue
-
-        if answer == 'stand':
             while True:
-                dealer_hand += deck.deal(1)
-                print("dealer hand: ")
-                print(dealer_hand)
-                print("dealer hand value: " + str(hand_score(dealer_hand)))
-                print("player hand: ")
-                print(player_hand)
-                print("player hand value: " + str(hand_score(player_hand)))
-                greet = "dealer has "
-                for i in dealer_hand:
-                    greet += str(i)
-                speak(greet, "dh")
-                time.sleep(5)
-                speak("Dealer hand score is " + str(hand_score(dealer_hand)), "dh")
-                time.sleep(5)
                 greet = "you have "
                 for i in player_hand:
                     greet += str(i)
@@ -155,76 +114,117 @@ while keepPlaying:
                 time.sleep(5)
                 speak("Your hand score is " + str(hand_score(player_hand)), "dh")
                 time.sleep(5)
-                if hand_score(dealer_hand) >= 17:
+                speak("Please choose: Hit or Stand","dh")
+                time.sleep(5)
+                answer = recognize()
+
+                if answer.find('hit') == -1 and answer.find('stand') == -1:
+                    continue
+
+                else:
+                    if answer.find('hit') != -1:
+                        answer='hit'
+                    elif answer.find('stand') != -1:
+                        answer='stand'
                     break
-                time.sleep(1)
 
-        if hand_score(dealer_hand) == hand_score(player_hand):
+            if answer == 'hit':
+                player_hand += deck.deal(1)
+                continue
 
-            print('wins:', wins, '\nlosses:', losses)
-            speak("Push, You have " + str(wins) + " wins and " + str(losses) + " losses", "ph")
-            time.sleep(5)
-            while True:
-                speak("Would you like to play another game, Yes or No?", "ph")
+            if answer == 'stand':
+                while True:
+                    dealer_hand += deck.deal(1)
+                    print("dealer hand: ")
+                    print(dealer_hand)
+                    print("dealer hand value: " + str(hand_score(dealer_hand)))
+                    print("player hand: ")
+                    print(player_hand)
+                    print("player hand value: " + str(hand_score(player_hand)))
+                    greet = "dealer has "
+                    for i in dealer_hand:
+                        greet += str(i)
+                    speak(greet, "dh")
+                    time.sleep(5)
+                    speak("Dealer hand score is " + str(hand_score(dealer_hand)), "dh")
+                    time.sleep(5)
+                    greet = "you have "
+                    for i in player_hand:
+                        greet += str(i)
+                    speak(greet, "dh")
+                    time.sleep(5)
+                    speak("Your hand score is " + str(hand_score(player_hand)), "dh")
+                    time.sleep(5)
+                    if hand_score(dealer_hand) >= 17:
+                        break
+                    time.sleep(1)
+
+            if hand_score(dealer_hand) == hand_score(player_hand):
+
+                print('wins:', wins, '\nlosses:', losses)
+                speak("Push, You have " + str(wins) + " wins and " + str(losses) + " losses", "ph")
                 time.sleep(5)
-                playAgain = recognize()
-                if playAgain.find('yes') == -1 and playAgain.find('no') == -1:
-                    continue
-                else:
-                    if playAgain.find('no') != -1:
-                        keepPlaying = False
+                while True:
+                    speak("Would you like to play another game, Yes or No?", "ph")
+                    time.sleep(5)
+                    playAgain = recognize()
+                    if playAgain.find('yes') == -1 and playAgain.find('no') == -1:
+                        continue
+                    else:
+                        if playAgain.find('no') != -1:
+                            keepPlaying = False
+                    break
+
                 break
 
-            break
+            elif hand_score(dealer_hand) > 21:
+                wins += 1
+                print('wins:', wins, '\nlosses:', losses)
+                speak("Dealer bust, you have " + str(wins) + " wins and " + str(losses) + " losses", "ph")
+                time.sleep(5)
+                while True:
+                    speak("Would you like to play another game, Yes or No?", "ph")
+                    time.sleep(5)
+                    playAgain=recognize()
+                    if playAgain.find('yes') == -1 and playAgain.find('no') == -1:
+                        continue
+                    else:
+                        if playAgain.find('no') != -1:
+                            keepPlaying=False
+                    break
+                break
 
-        elif hand_score(dealer_hand) > 21:
-            wins += 1
-            print('wins:', wins, '\nlosses:', losses)
-            speak("Dealer bust, you have " + str(wins) + " wins and " + str(losses) + " losses", "ph")
-            time.sleep(5)
-            while True:
-                speak("Would you like to play another game, Yes or No?", "ph")
+            elif hand_score(dealer_hand) > hand_score(player_hand):
+                losses += 1
+                speak("Dealer won, You have " + str(wins) + " wins and " + str(losses) + " losses", "ph")
                 time.sleep(5)
-                playAgain=recognize()
-                if playAgain.find('yes') == -1 and playAgain.find('no') == -1:
-                    continue
-                else:
-                     if playAgain.find('no') != -1:
-                        keepPlaying=False
+                print('wins:', wins, '\nlosses:', losses)
+                while True:
+                    speak("Would you like to play another game, Yes or No?", "ph")
+                    time.sleep(5)
+                    playAgain=recognize()
+                    if playAgain.find('yes') == -1 and playAgain.find('no') == -1:
+                        continue
+                    else:
+                        if playAgain.find('no') != -1:
+                            keepPlaying=False
+                    break
                 break
-            break
-
-        elif hand_score(dealer_hand) > hand_score(player_hand):
-            losses += 1
-            speak("Dealer won, You have " + str(wins) + " wins and " + str(losses) + " losses", "ph")
-            time.sleep(5)
-            print('wins:', wins, '\nlosses:', losses)
-            while True:
-                speak("Would you like to play another game, Yes or No?", "ph")
+            else:
+                wins += 1
+                speak("Player wins, You have " + str(wins) + " wins and " + str(losses) + " losses", "ph")
                 time.sleep(5)
-                playAgain=recognize()
-                if playAgain.find('yes') == -1 and playAgain.find('no') == -1:
-                    continue
-                else:
-                    if playAgain.find('no') != -1:
-                        keepPlaying=False
+                print('wins:', wins, '\nlosses:', losses)
+                while True:
+                    speak("Would you like to play another game, Yes or No?", "ph")
+                    time.sleep(5)
+                    playAgain=recognize()
+                    if playAgain.find('yes') == -1 and playAgain.find('no') == -1:
+                        continue
+                    else:
+                        if playAgain.find('no') != -1:
+                            keepPlaying = False
+                    break
                 break
-            break
-        else:
-            wins += 1
-            speak("Player wins, You have " + str(wins) + " wins and " + str(losses) + " losses", "ph")
-            time.sleep(5)
-            print('wins:', wins, '\nlosses:', losses)
-            while True:
-                speak("Would you like to play another game, Yes or No?", "ph")
-                time.sleep(5)
-                playAgain=recognize()
-                if playAgain.find('yes') == -1 and playAgain.find('no') == -1:
-                    continue
-                else:
-                    if playAgain.find('no') != -1:
-                        keepPlaying = False
-                break
-            break
 
 

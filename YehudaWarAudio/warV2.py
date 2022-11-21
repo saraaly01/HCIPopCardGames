@@ -5,7 +5,7 @@ from gtts import gTTS
 import time
 import os
 import speech_recognition as sr
-from mutagen.mp3 import MP3
+#from mutagen.mp3 import MP3
 
 
 
@@ -26,11 +26,6 @@ def playOutput(textInp):
     myobj.save("test.mp3")
     os.system("mpg123 test.mp3")
 
-
-    audio = MP3("test.mp3")
-    print("The length of the output is: " + str(audio.info.length))
-    # time.sleep(audio.info.length)
-    print("Input is ready to be taken")
 
 
 
@@ -172,7 +167,7 @@ while continuePlaying == True:
     # computer wins turn
     elif valueCompare == 2:
         print(str(cardPlayedC),"is greater than", str(cardPlayedP))
-        playOutput("This is lower than" + str(cardPlayedC) + " and so you get both cards.")
+        playOutput("This is lower than" + str(cardPlayedC) + " and so the computer gets both cards.")
         computer_hand.add(cardPlayedC)
         computer_hand.add(cardPlayedP)
     outputString = "the player hand size is now " + str(player_hand.size) + " and the computer hand size is now " + str(computer_hand.size)
