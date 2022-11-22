@@ -170,13 +170,15 @@ def main():
         #player_hand+=deck.get("9 of Hearts")
         dealer_hand = pydealer.Stack()
         dealer_hand += deck.deal(1)
-        dealerArrays = np.array(cv2.imread(crd[str(dealer_hand[-1])]))
+        #!!commented out to get rid of card output
+        #dealerArrays = np.array(cv2.imread(crd[str(dealer_hand[-1])]))
         player_hand += deck.deal(2)
-        playerArrays = np.concatenate((cv2.imread(crd[str(player_hand[0])]), cv2.imread(crd[str(player_hand[1])])), axis=1)
+        #!!commented out to get rid of card output
+        #playerArrays = np.concatenate((cv2.imread(crd[str(player_hand[0])]), cv2.imread(crd[str(player_hand[1])])), axis=1)
         while True:
             print_status(dealer_hand, player_hand)
-
-            cv2.imshow('Dealer', dealerArrays)
+            #!!commented out to get rid of card output
+            #cv2.imshow('Dealer', dealerArrays)
             cv2.waitKey(5000)
             greet = "dealer has "
             for i in dealer_hand:
@@ -188,8 +190,8 @@ def main():
 
             if hand_score(player_hand) == 21:
                 wins += 1
-
-                cv2.imshow('Player', playerArrays)
+                #!!commented out to get rid of card output
+                #cv2.imshow('Player', playerArrays)
                 cv2.waitKey(5000)
                 greet = "you have "
                 for i in player_hand:

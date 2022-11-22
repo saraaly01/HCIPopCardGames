@@ -82,16 +82,19 @@ def main():
     wins = 0
     losses = 0
     keepPlaying = True
-    crd = {"2 of Diamonds": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\2_of_diamonds.png",
-           "2 of Hearts": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\2_of_hearts.png",
-           "2 of Clubs": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\2_of_clubs.png",
-           "2 of Spades": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\2_of_spades.png",
-           "3 of Diamonds": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\3_of_diamonds.png",
-           "3 of Hearts": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\3_of_hearts.png",
-           "3 of Clubs": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\3_of_clubs.png",
-           "3 of Spades": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\3_of_spades.png",
-           "4 of Diamonds": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\4_of_diamonds.png",
-           "4 of Hearts": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\4_of_hearts.png",
+    nik_card_dir = "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\"
+    rebecca_card_dir = "C:\\Users\\btoth\\Desktop\\Fall_2022\\HCI\\HCIPopCardGames\\cards\\cards\\"
+    cur_card_dir = nik_card_dir
+    crd = {"2 of Diamonds": cur_card_dir + "2_of_diamonds.png",
+           "2 of Hearts": cur_card_dir + "2_of_hearts.png",
+           "2 of Clubs": cur_card_dir + "2_of_clubs.png",
+           "2 of Spades": cur_card_dir + "2_of_spades.png",
+           "3 of Diamonds": cur_card_dir + "3_of_diamonds.png",
+           "3 of Hearts": cur_card_dir + "3_of_hearts.png",
+           "3 of Clubs": cur_card_dir + "3_of_clubs.png",
+           "3 of Spades": cur_card_dir + "3_of_spades.png",
+           "4 of Diamonds": cur_card_dir + "4_of_diamonds.png",
+           "4 of Hearts": cur_card_dir + "4_of_hearts.png",
            "4 of Clubs": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\4_of_clubs.png",
            "4 of Spades": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\4_of_spades.png",
            "5 of Diamonds": "C:\\Users\\nikki\\PycharmProjects\\CSC355-HW5\\cards\\5_of_diamonds.png",
