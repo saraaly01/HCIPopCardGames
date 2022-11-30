@@ -23,14 +23,14 @@ mic = sr.Microphone()
 # processIncoming loops through the queue (the communication between the GUI and the thread listening for input)
 class GuiPart:
     # __init__ sets up the GUI (put initial visuals and buttons there)
-    def __init__(self, master, queue, endCommand):
+    def __init__(self, main, queue, endCommand):
         def func(args):
             print(args)
 
         self.queue = queue
         # Set up the GUI
         # Button to quit
-        console = tkinter.Button(master, text='Done', command=endCommand)
+        console = tkinter.Button(main, text='Done', command=endCommand)
         console.pack()
         # IDEA: we could add Hit and Stand Buttons. It wouldn't really matter if the user says the word or hits the button, it would call the same command
 
@@ -59,8 +59,8 @@ class GuiPart:
                 # expect this branch to be taken in this case
                 pass
 
-#ListeningThread Class- three functions (init, periodicCall, recognize, workerThread1)
-class ListeningThread:
+#ThreadCreator Class- three functions (init, periodicCall, getInput, audioListener)
+class ThreadCreator:
     """
     Launch the main part of the GUI and the worker thread. periodicCall and
     endApplication could reside in the GUI part, but putting them here
@@ -68,32 +68,32 @@ class ListeningThread:
     """
 
     #init- sets up the queue (this communicates with the GUI/main code)
-    def __init__(self, master):  # master is already in the params
+    def __init__(self, main):  # main is already in the params
         """
         Start the GUI and the asynchronous threads. We are in the main
         (original) thread of the application, which will later be used by
         the GUI as well. We spawn a new thread for the worker (I/O).
         """
-        self.master = master
+        self.main = main
 
         # Create the queue
-        self.queue = queue.Queue()
+        self.inputQueue = queue.Queue()
 
         # Set up the GUI part
-        self.gui = GuiPart(master, self.queue, self.endApplication)
+        self.gui = GuiPart(main, self.inputQueue, self.endApplication)
 
         # Set up the thread to do asynchronous I/O
         # More threads can also be created and used, if necessary
         self.running = 1
-        self.thread1 = threading.Thread(target=self.workerThread1)
-        self.thread1.start()
+        self.audioListenerThread = threading.Thread(target=self.audioListener)
+        self.audioListenerThread.start()
 
         # Start the periodic call in the GUI to check if the queue contains
         # anything
         self.periodicCall()
 
     #periodicCall- loops through, calling processIncoming in the GUI class
-    def periodicCall(self):  # adding master to the params
+    def periodicCall(self):  # adding main to the params
         """
         Check every 200 ms if there is something new in the queue.
         """
@@ -105,56 +105,41 @@ class ListeningThread:
             # some cleanup before actually shutting it down.
             import sys
             sys.exit(1)
-        self.master.after(200, self.periodicCall)
+        self.main.after(200, self.periodicCall)
 
-    #recognizes voice commands from user
-    def recognize(self):
-        print("start talking")
-        with mic as source:
-            try:
-                r.adjust_for_ambient_noise(source=source, duration=1)
-                audio = r.listen(source, timeout=5)
-                text = r.recognize_google(audio, language='en', show_all=True)
-                print(text)
-                return str(text)
-            except:
-                print("cant recognize speech")
-                text = "speech unrecognized, I'm sorry"
-                pass
-        print("done talking")
-        return text
-
-    #Calls recognize function- tells if the user says hit or stand (lil buggy)
+    #Calls getInput function- tells if the user says hit or stand (lil buggy)
     #It will also quit if you tell it to quit
-    def workerThread1(self):
+    def audioListener(self):
         """
         This is where we handle the asynchronous I/O. For example, it may be
         a 'select(  )'. One important thing to remember is that the thread has
         to yield control pretty regularly, by select or otherwise.
         """
+        msg = ''
         while self.running:
-            time.sleep(2)
-            print("Taking in speaking input")
-            user_voice = self.recognize()
-            if user_voice.find('hit') != -1:
-                msg = 'hit'
-            elif user_voice.find('stand') != -1:
-                msg = 'stand'
-            elif user_voice.find('quit') != -1:
-                msg = "quit"
-                self.endApplication()
-            else:
-                msg = 'not hit'
 
-            self.queue.put(msg)
+            print("Taking in speaking input")
+
+            with mic as source:
+                try:
+                    r.adjust_for_ambient_noise(source=source, duration=1)
+                    audio = r.listen(source, timeout=5)
+                    msg = r.recognize_google(audio, language='en')
+                    print(msg)
+                except:
+                    print("cant recognise speech")
+                    msg = "-"
+
+            self.inputQueue.put(msg)
+        print("Have a nice day")
 
     def endApplication(self):
         self.running = 0
 
 
-rand = random.Random()
 root = tkinter.Tk()
 root.geometry('700x700+300+100')
 
-client = ListeningThread(root)
+client = ThreadCreator(root)
 root.mainloop()
+client.endApplication()
