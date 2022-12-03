@@ -1,12 +1,55 @@
-#code with back.py creates WAR GUI
-
+import pydealer
 from tkinter import *
 from PIL import Image, ImageTk
-import time
-import pydealer
+import numpy as np
+import speech_recognition as sr
+import os, sys, time
+from gtts import gTTS
+import queue, threading
 
+global output
+global computer_hand, player_hand, cardPlayedP, cardPlayedC, cardBackPlayer, cardBackComputer
+global root, warWait, flip
+warWait = 0
+
+output = queue.Queue()  #output queue will hold messages that a thread will output with voice
 width = int(250/2.5)
 height = int(363/2.5)
+
+#outPutAudio is one of the worker functions
+def outPutAudio():
+    while True: #thread is constantly checking if there is a message on the queue it has to output
+        while output.empty() == False: # if the queue is not empty the thread will get ready to output the message
+            msg = output.get(0)
+            #next three lines uses google's package for text to speech
+            myobj = gTTS(text=msg, lang='en', tld='us', slow=False)  
+            myobj.save("test.mp3")
+            os.system("mpg123 test.mp3")      
+
+
+#audioListener is the other worker function
+def audioListener(): 
+    global warWait
+    r = sr.Recognizer()
+    mic = sr.Microphone()
+    while True: #constantly using the microphone to check if the user is saying something
+        with mic as source:
+            try:
+                r.adjust_for_ambient_noise(source=source, duration=1)
+                audio = r.listen(source, timeout=5)
+                msg = r.recognize_google(audio, language='en')
+                print(msg)  #for debugging reasons prints msg
+            except:
+                msg = "-"
+        if msg == "yes":  #user picked hit and calls hit function
+            print("entered1")
+            if warWait:
+                print("entered2")
+                cardTie()
+                warWait = 0
+        if msg == "quit" or end:
+            root.destroy()
+            sys.exit()
 def compareCards(card1, card2): 
     #function takes two cards and compares their numerical value
     #return 1 if card1 greater, return 2 if card2 greater, return 0 if tie
@@ -41,9 +84,13 @@ def compareCards(card1, card2):
     elif int(cardTwo) > int(cardOne): #computers value is higher, returns 2
         return 2
 
-def cardTie(player_hand, computer_hand, root, var):
-    #function handles a tie in war
-    labels = []  #array keeps track of tkinter labels made for tie so we can delete them from GUI after tie has been handeled 
+#function handles a tie in war
+def cardTie():
+    global root, labels, player_hand, computer_hand, cardPlayedP, cardPlayedC
+    computer_hand.shuffle()
+    player_hand.shuffle()
+    labels[-1].destroy() #tie widget
+    labels[-2].destroy() #waitWarButton widget
     cardPlayedPTie = [] #array keeps track of all cards played in tie for the player 
     cardPlayedCTie  = [] #array keeps track of all cards played in tie for the computer
     playerX = .22 #x value for placing cards on the players side (left side of screen)
@@ -53,43 +100,51 @@ def cardTie(player_hand, computer_hand, root, var):
         #in a tie, four cards should be placed, with the fourth card being the one you compare to
         #if player/computer hand is less than 4 
         if player_hand.size != 0:
-            cardPlayedP = player_hand.random_card(remove = True)
-            cardPlayedPTie.append(cardPlayedP)
-            img= insertImage(cardPlayedP,root)
+            cardPlayedPcurr = player_hand.random_card(remove = True)
+            cardPlayedPTie.append(cardPlayedPcurr)
+            img= insertImage(cardPlayedPcurr,root)
             img.place(relx = playerX + (.05 *i), rely = .3)
             labels.append(img)
 
         if computer_hand.size != 0:
-            cardPlayedC = computer_hand.random_card(remove = True)
-            cardPlayedCTie.append(cardPlayedC)
-            img= insertImage(cardPlayedC,root)
+            cardPlayedCcurr = computer_hand.random_card(remove = True)
+            cardPlayedCTie.append(cardPlayedCcurr)
+            img= insertImage(cardPlayedCcurr,root)
             img.place(relx = computerX - (.05 *i), rely = .3)
             labels.append(img)
     
-    #root.update()
-    valueCompareTie = compareCards(str(cardPlayedP), str(cardPlayedC))
+    valueCompareTie = compareCards(str(cardPlayedPcurr), str(cardPlayedCcurr))
     if valueCompareTie == 0: # cards are equal 
         tie = Label(root, text= "TIE, CARDS BACK!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
         tie.place(relx =.45, rely = .2)
-        root.wait_variable(var)
         for cardP in cardPlayedPTie:
             player_hand.add(cardP)
         for cardC in cardPlayedCTie:
             computer_hand.add(cardC)
-        tie.destroy()
+        labels.append(tie)
     elif valueCompareTie == 1:
+        playerWin = Label(root, text= "PLAYER's WIN!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
+        playerWin.place(relx =.15, rely = .2)
+        labels.append(playerWin)
         for cardP in cardPlayedPTie:
             player_hand.add(cardP)
         for cardC in cardPlayedCTie:
             player_hand.add(cardC)
     elif valueCompareTie == 2:
+        computerWin = Label(root, text= "COMPUTER's WIN!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
+        computerWin.place(relx =.65, rely = .2)
+        labels.append(computerWin)
         for cardP in cardPlayedPTie:
             computer_hand.add(cardP)
         for cardC in cardPlayedCTie:
             computer_hand.add(cardC)
+    player_hand.add(cardPlayedP)
+    computer_hand.add(cardPlayedC)
     
+    flip['state'] = NORMAL
 
-    return player_hand, computer_hand, labels, valueCompareTie
+    if computer_hand.size == 0 or player_hand.size == 0 and (warWait == 0):
+        finish()
 
 def insertImage(cardPlayed,root):
     cardOutput = Image.open("cards\\" + str(cardPlayed) + ".png")
@@ -99,13 +154,81 @@ def insertImage(cardPlayed,root):
     imglabel.image = test
     return imglabel
 
+def flipCard():
+    global root, labels
+    global cardBackPlayer, cardBackComputer, cardPlayedP, cardPlayedC, computer_hand, player_hand
+    global warWait, flip
+
+    computer_hand.shuffle()
+    player_hand.shuffle()
+    
+    for label in labels:
+        label.destroy()
+ 
+    playerNumCards = Label(cardBackPlayer, text = str(player_hand.size), font=("Comic Sans MS", 20))
+    playerNumCards.place(relx= 0, rely=.0)
+    labels.append(playerNumCards)
+    computerNumCards = Label(cardBackComputer, text = str(computer_hand.size), font=("Comic Sans MS", 20))
+    computerNumCards.place(relx= 0, rely=0)
+    labels.append(computerNumCards)
+    if computer_hand.size == 0 or player_hand.size == 0 and (warWait == 0):
+        finish()
+        return
+
+    cardPlayedC = computer_hand.random_card(remove = True)
+    imgPlayedC = insertImage(cardPlayedC,root)
+    imgPlayedC.place(relx=0.8, rely=.3) 
+    labels.append(imgPlayedC)
+    cardPlayedP = player_hand.random_card(remove = True)
+    imgPlayedP = insertImage(cardPlayedP,root)
+    imgPlayedP.place(relx=0.12, rely=.3) 
+    labels.append(imgPlayedP)
+
+    valueCompare = compareCards(str(cardPlayedP), str(cardPlayedC))
+    if valueCompare == 0: # cards are equal 
+        tie = Label(root, text= "TIE, WAR!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
+        tie.place(relx =.45, rely = .2)
+        labels.append(tie)
+        waitWarButton = Button(root, text ="WAR", command=lambda: cardTie())
+        waitWarButton.place(relx=.45, rely = .85)
+        labels.append(waitWarButton)
+        warWait = 1
+        flip['state'] = DISABLED
+
+    if valueCompare == 1:
+        playerWin = Label(root, text= "PLAYER's WIN!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
+        playerWin.place(relx =.15, rely = .2)
+        labels.append(playerWin)
+        player_hand.add(cardPlayedC)
+        player_hand.add(cardPlayedP)
+    elif valueCompare == 2: #computer won the card
+        computerWin = Label(root, text= "COMPUTER's WIN!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
+        computerWin.place(relx =.65, rely = .2)
+        labels.append(computerWin)
+
+        computer_hand.add(cardPlayedC)
+        computer_hand.add(cardPlayedP)
+
+    flip.config(text = "FLIP")
+  
+
+def finish():
+    flip.destroy()
+    if player_hand.size == 0:
+        playerWinsGame = Label(root, text = "COMPUTER WINS. GAME OVER", font=("Comic Sans MS", 40))
+        playerWinsGame.place(relx= .4, rely=.6)
+    elif computer_hand.size == 0:
+        computerWinsGame = Label(root, text = "PLAYER WINS. GAME OVER", font=("Comic Sans MS", 40))
+        computerWinsGame.place(relx= .4, rely=.6)
+    return
 
 def intialize(rootIN):
+    global root, labels, flip
+    global cardBackPlayer, cardBackComputer,  cardPlayedP, cardPlayedC, computer_hand, player_hand
     labels = []
-    valueCompare = -1
+
     deck = pydealer.Deck()
     deck.shuffle()
-
     player_hand = pydealer.Stack()
     player_hand += deck.deal(26)
     computer_hand = pydealer.Stack()
@@ -135,106 +258,22 @@ def intialize(rootIN):
     cardBack = ImageTk.PhotoImage(cardBack)
     cardBackPlayer= Label(root, image=cardBack)
     cardBackPlayer.image = cardBack
-    
     cardBackPlayer.place(relx=0.02, rely=.3)
-
     cardBackComputer = Label(root, image=cardBack)
     cardBackComputer.image = cardBack
     cardBackComputer.place(relx=.9, rely=.3)
 
     playerNumCards = Label(cardBackPlayer, text = str(player_hand.size), font=("Comic Sans MS", 20))
     playerNumCards.place(relx= 0, rely=.0)
+    labels.append(playerNumCards)
+
     computerNumCards = Label(cardBackComputer, text = str(computer_hand.size), font=("Comic Sans MS", 20))
     computerNumCards.place(relx= 0, rely=0)
-    var = IntVar()
-    flip = Button(root, text ="PLAY CARD", command=lambda: var.set(1))
+    labels.append(computerNumCards)
+
+    flip = Button(root, text ="FLIP", command=lambda: flipCard())
     flip.place(relx=.45, rely = .8)
 
-    start = 1
-    while True:   
-        computer_hand.shuffle()
-        player_hand.shuffle()
-        flip.config(text = "PLAY CARD")
-        if not start:
-            imgPlayedP.destroy()
-            imgPlayedC.destroy()
-            if valueCompare == 1:
-                playerWin.destroy()
-            else:
-                computerWin.destroy()
-            for label in labels:
-                label.destroy()
-      
-        root.wait_variable(var)
-        start = 0
-        playerNumCards.destroy()
-        computerNumCards.destroy()
+    #audioListenerThread = threading.Thread(target=audioListener)
+    #audioListenerThread.start()
 
-        playerNumCards = Label(cardBackPlayer, text = str(player_hand.size), font=("Comic Sans MS", 20))
-        playerNumCards.place(relx= 0, rely=.0)
-      
-        computerNumCards = Label(cardBackComputer, text = str(computer_hand.size), font=("Comic Sans MS", 20))
-        computerNumCards.place(relx= 0, rely=0)
-        
-     
-
-        
-        if player_hand.size == 0:
-            playerWinsGame = Label(root, text = "COMPUTER WINS. GAME OVER", font=("Comic Sans MS", 40))
-            playerWinsGame.place(relx= .4, rely=.6)
-            flip.config(text = "END")
-            root.wait_variable(var)
-            break
-        elif computer_hand.size == 0:
-            computerWinsGame = Label(root, text = "PLAYER WINS. GAME OVER", font=("Comic Sans MS", 40))
-            computerWinsGame.place(relx= .4, rely=.6)
-            flip.config(text = "END")
-            root.wait_variable(var)
-            break
-
-
-
-        cardPlayedC = computer_hand.random_card(remove = True)
-        imgPlayedC = insertImage(cardPlayedC,root)
-        imgPlayedC.place(relx=0.8, rely=.3) 
-        cardPlayedP = player_hand.random_card(remove = True)
-        imgPlayedP = insertImage(cardPlayedP,root)
-        imgPlayedP.place(relx=0.12, rely=.3) 
-
-        valueCompare = compareCards(str(cardPlayedP), str(cardPlayedC))
-        if valueCompare == 0: # cards are equal 
-            tie = Label(root, text= "TIE, WAR!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
-            tie.place(relx =.45, rely = .2)
-            flip.config(text = "WAR!")
-            root.wait_variable(var)
-            tie.destroy()
-            flip.config(text = "CONTINUE") 
-            player_hand, computer_hand, labels, valueCompare = cardTie(player_hand, computer_hand,root, var)
-            flip.config(text = "PLAY CARD")
-            if valueCompare == 0:
-                player_hand.add(cardPlayedP)
-                computer_hand.add(cardPlayedC)
-
-        if valueCompare == 1:
-            playerWin = Label(root, text= "PLAYER's WIN!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
-            playerWin.place(relx =.15, rely = .2)
-            player_hand.add(cardPlayedC)
-            player_hand.add(cardPlayedP)
-        elif valueCompare == 2: #computer won the card
-            computerWin = Label(root, text= "COMPUTER's WIN!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
-            computerWin.place(relx =.65, rely = .2)
-            computer_hand.add(cardPlayedC)
-            computer_hand.add(cardPlayedP)
-    
-        flip.config(text = "CONTINUE")
-        root.wait_variable(var)
-
-        
-
-    root.destroy()
-    return
-
-    
-    
-if __name__ == '__main__':
-    main()
