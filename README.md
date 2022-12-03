@@ -1,8 +1,11 @@
 # HCIPopCardGames
 
-##installations for us atm
-pip install pydealer 
-pip install zope.interface (better interface than what python has to offer)
+## Installations
+-mpg files
+- pip install tk (tkinter) 
+-pip install Pillow (requirements might be satified but just incase)
+- pip install python (a version atleast 3.10.6 or higher)
+-pip install pydealer
+- pip install SpeechRecognition
+- pip install gTTS
 
-
-pydealer needs atleast 3.10.6 python
