@@ -55,6 +55,6 @@ def getInput(desiredWords):
     except sr.UnknownValueError:
         return "unable to recognize speech"
 
-
+getInput()
 
 

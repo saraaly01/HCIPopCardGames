@@ -7,8 +7,7 @@ import os, sys, time
 from gtts import gTTS
 import queue, threading
 
-global root, hitButton, standButton, flippedCard, end, outPut, playAgainButton
-end = 0  # end determines if the game has been finished (for example if the player has reached 21)
+global root, hitButton, standButton, flippedCard, end, outPut, playAgainButton, rootIn2
 output = queue.Queue()  # output queue will hold messages that a thread will output with voice
 deck = pydealer.Deck()  # card deck
 #deck.shuffle()  # shuffle the deck
@@ -21,8 +20,7 @@ def outPutAudio():
     while True:  # thread is constantly checking if there is a message on the queue it has to output
         while output.empty() == False:  # if the queue is not empty the thread will get ready to output the message
             msg = output.get(0)
-            hitButton[
-                'state'] = DISABLED  # while the computer is talking the user can not press the stand or hit button
+            hitButton['state'] = DISABLED  # while the computer is talking the user can not press the stand or hit button
             standButton['state'] = DISABLED
             # next three lines uses google's package for text to speech
             myobj = gTTS(text=msg, lang='en', tld='us', slow=False)
@@ -49,6 +47,7 @@ def audioListener():
                 print(msg)  # for debugging reasons prints msg
             except:
                 msg = "-"
+        msg = msg.lower()
         if msg == "yes":  # user picked hit and calls hit function
             output.put("You picked hit.")
             hitAction()
@@ -58,13 +57,16 @@ def audioListener():
         if msg == "quit":
             root.destroy()
             sys.exit()
-        # will add play again if we fix the function and theres time
+        if msg == "again":
+            playAgain()
+            return
 
 
-def playAgain(rootIN):
+def playAgain():
+
     # this does not work
     root.destroy()
-    main(rootIN)
+    main(rootIn2)
 
 
 # function when user wants to hit
@@ -185,13 +187,14 @@ def finish():
 
 
 def main(rootIN):
-    global root, dealer_hand, player_hand, deck, xDealer, xPlayer, hitButton, standButton, flippedCard, playAgainButton
+    global root, dealer_hand, player_hand, deck, xDealer, xPlayer, hitButton, standButton, flippedCard, playAgainButton, end, rootIn2
+    end = 0
     # many global variables to use threads seamlessly
     xPlayer = 0  # this is the x value that will be used (and changed) to place the cards on the GUI on the players side
     xDealer = .05  # this is the y value that will be used (and changed) to place the cards on the GUI on the dealers sie
 
     deck.shuffle()  # shuffling one more time as it seems to help vary the cards more
-
+    rootIn2 = rootIN
     root = Toplevel(rootIN)  # creates a new window from the menu
     root.title('PopCardGames: 21')
     root['background'] = '#8B0000'  # changes it to the red
@@ -243,7 +246,7 @@ def main(rootIN):
     standButton.place(relx=.6, rely=.7)
 
     # might be removed
-    playAgainButton = Button(root, text="Play Again", font=("Comic Sans MS", 15), command=lambda: playAgain(rootIN),
+    playAgainButton = Button(root, text="Play Again", font=("Comic Sans MS", 15), command=lambda: playAgain(),
                              state=DISABLED)
     playAgainButton.place(relx=.45, rely=.7)
 
