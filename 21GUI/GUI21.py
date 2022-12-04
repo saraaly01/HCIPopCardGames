@@ -7,7 +7,7 @@ import os, sys, time
 from gtts import gTTS
 import queue, threading
 
-global root, hitButton, standButton, flippedCard, end, outPut, playAgainButton, rootIn2
+global root, hitButton, standButton, flippedCard, end, outPut, playAgainButton, rootIn2, standCalled
 output = queue.Queue()  # output queue will hold messages that a thread will output with voice
 deck = pydealer.Deck()  # card deck
 #deck.shuffle()  # shuffle the deck
@@ -36,6 +36,8 @@ def outPutAudio():
 
 # audioListener is the other worker function
 def audioListener():
+    global standCalled
+    standCalled = 0
     r = sr.Recognizer()
     mic = sr.Microphone()
     while True:  # constantly using the microphone to check if the user is saying something
@@ -48,22 +50,22 @@ def audioListener():
             except:
                 msg = "-"
         msg = msg.lower()
-        if msg == "yes":  # user picked hit and calls hit function
+        if msg == "yes" and standCalled == 0:  # user picked hit and calls hit function
             output.put("You picked hit.")
             hitAction()
-        if msg == "no":  # user picked stand and calls stand function
+        if msg == "no" and standCalled == 0:  # user picked stand and calls stand function
             output.put("You picked stand.")
+            standCalled = 1
             standAction()
         if msg == "quit":
-            root.destroy()
-            sys.exit()
-        if msg == "again":
+            quit()
+            return
+        if msg == "again" and standCalled:
             playAgain()
             return
 
 
 def playAgain():
-
     # this does not work
     root.destroy()
     main(rootIn2)
@@ -88,7 +90,8 @@ def hitAction():
 
 # function if user chooses stand or stand is called
 def standAction():
-    global dealer_hand, deck, xDealer, flippedCard, root
+    global dealer_hand, deck, xDealer, flippedCard, root, standCalled
+    standCalled = 1
     # disables hit and stand as they can no longer play
     hitButton['state'] = DISABLED
     standButton['state'] = DISABLED
@@ -127,6 +130,12 @@ def insertImage(cardPlayed):
     imglabel = Label(root, image=test)
     imglabel.image = test
     return imglabel
+
+def quit():
+    global end 
+    end = 1
+    root.destroy()
+    os._exit(0)
 
 
 # given a hand, returns hand score
@@ -180,15 +189,20 @@ def finish():
     elif playerScore == dealerScore:
         result = "Push. The game is a tie."
     resultLabel = Label(root, text=result, font=("Comic Sans MS", 20), bg='#8B0000', relief="solid")
-    resultLabel.place(relx=.4, rely=.8)
+    resultLabel.place(relx=.4, rely=.55)
     output.put("The result of the game is " + result)
     output.put("Say again to play again or say quit to quit.")
-    end = 1  # global end variable is assigned one so that earlier threads can be ended
+    end = 1  # global end variable is assigned so that playagin button can pop up
+    quitButton = Button(root, text="QUIT", font=("Comic Sans MS", 15), command=lambda:quit())
+    quitButton.place(relx=.45, rely=.8)
+
 
 
 def main(rootIN):
     global root, dealer_hand, player_hand, deck, xDealer, xPlayer, hitButton, standButton, flippedCard, playAgainButton, end, rootIn2
+    global standCalled
     end = 0
+    standCalled = 0
     # many global variables to use threads seamlessly
     xPlayer = 0  # this is the x value that will be used (and changed) to place the cards on the GUI on the players side
     xDealer = .05  # this is the y value that will be used (and changed) to place the cards on the GUI on the dealers sie
@@ -245,7 +259,6 @@ def main(rootIN):
     standButton = Button(root, text="STAND", font=("Comic Sans MS", 15), command=lambda: standAction())
     standButton.place(relx=.6, rely=.7)
 
-    # might be removed
     playAgainButton = Button(root, text="Play Again", font=("Comic Sans MS", 15), command=lambda: playAgain(),
                              state=DISABLED)
     playAgainButton.place(relx=.45, rely=.7)
