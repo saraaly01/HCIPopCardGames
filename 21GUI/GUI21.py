@@ -48,9 +48,12 @@ def audioListener():
             except:
                 msg = "-"
         msg = msg.lower()
+
         if msg == "yes" and standCalled == 0:  # user picked hit and calls hit function
+            hitButton['state'] = DISABLED 
             output.put("You picked hit.")
             hitAction()
+            hitButton['state'] = NORMAL 
         if msg == "no" and standCalled == 0:  # user picked stand and calls stand function
             output.put("You picked stand.")
             standCalled = 1
@@ -59,12 +62,12 @@ def audioListener():
             quit()
             return
         if msg == "again" and standCalled:
-            playAgain()
+            playAgainButton.invoke() #fixed again bug
             return
 
 
+
 def playAgain():
-    # this does not work
     root.destroy()
     main()
 
@@ -269,7 +272,7 @@ def main():
     audioListenerThread.start()
     audioSpeakerThread = threading.Thread(target=outPutAudio)
     audioSpeakerThread.start()
-
+    output.put("Welcome to 21.")
     # displays the players card
     for card in player_hand:
         imgPlayed = insertImage(card)
