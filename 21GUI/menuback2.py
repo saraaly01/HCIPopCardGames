@@ -59,11 +59,15 @@ def audioListener():
                 msg = "--"
 
         if msg == "audio":
-            audioChoice = "Vaudio" #!!differentiate audio from button and audio from voice
-            outputCurSetting()
+            #audioChoice = "Vaudio" #!!differentiate audio from button and audio from voice
+            voiceAudioChoice = "0"
+            set_audio_voice(voiceAudioChoice)
+            #outputCurSetting()
         elif msg == "silent" or msg == "silence":
-            audioChoice = "Vsilent" #!!differentiate audio from button and audio from voice
-            outputCurSetting()
+            #audioChoice = "Vsilent" #!!differentiate audio from button and audio from voice
+            voiceAudioChoice = "1"
+            set_audio_voice(voiceAudioChoice)
+            #outputCurSetting()
         elif msg == "21":
             choose_21()
             return
@@ -74,15 +78,26 @@ def audioListener():
 #sets the audio choice with the button
 def set_audio():
     global audioChoice
-    if selected_audio_setting.get() == '0' or audioChoice == "Vaudio": #!!differentiate audio from button and audio from voice
+    #if selected_audio_setting.get() == '0' or audioChoice == "Vaudio": #!!differentiate audio from button and audio from voice
+    if selected_audio_setting.get() == '0':
         #print(type(selected_audio_setting.get()))
         audioChoice = "audio"
         print("With audio")
         outputCurSetting()
-    elif selected_audio_setting.get() == '1' or audioChoice == "Vsilent": #!!differentiate audio from button and audio from voice
+    #elif selected_audio_setting.get() == '1' or audioChoice == "Vsilent": #!!differentiate audio from button and audio from voice
+    elif selected_audio_setting.get() == '1':
         #print(type(selected_audio_setting.get()))
         audioChoice = "silent"
         print("WithOUT audio")
+        outputCurSetting()
+
+def set_audio_voice(x):
+    global audioChoice
+    if x == "0":
+        audioChoice = "audio"
+        outputCurSetting()
+    elif x == "1":
+        audioChoice = "silent"
         outputCurSetting()
 
 #NOTE: refactor choose_21 and choose_war into one - ERROR IS HERE
@@ -91,14 +106,20 @@ def choose_21():
     print("TWENTY ONE CHOSEN!!")
     global gameChoice
     gameChoice = "21"
+    print("This is what audioChoice is stored as:" + audioChoice)
+    print("This is audioChoice's type:" + str(type(audioChoice)))
     if audioChoice == "--":
         print("No audio choice selected, setting to audio by default")
-    if audioChoice == "audio" or "Vaudio": #for some reason, the program treats the audioChoice as a list of options. Switching from audio to no audio stores both
+    #if audioChoice == "audio" or "Vaudio": #for some reason, the program treats the audioChoice as a list of options. Switching from audio to no audio stores both
+    if audioChoice == "audio":
         print("Audio selected")
-    if audioChoice == "silent" or "Vsilent": #for some reason, the program treats the audioChoice as a list of options. Switching from audio to no audio stores both
+    #if audioChoice == "silent" or "Vsilent": #for some reason, the program treats the audioChoice as a list of options. Switching from audio to no audio stores both
+    if audioChoice == "silent":
         print("No Audio/Silent selected")
-    else:
-        print("Something's wrong- there was no selection and the audio default isn't set")
+
+    #Weird bug that may not matter- when you select audio with voice, it executes this else
+    #else:
+        #print("Something's wrong- there was no selection and the audio default isn't set")
 
 def choose_war():
     print("WAR CHOSEN!!")
