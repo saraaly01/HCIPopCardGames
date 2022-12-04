@@ -10,7 +10,10 @@ import speech_recognition as sr
 
 
 def start():
-    main(root)
+    root.destroy()
+    main()
+    return    
+
 
 
 root = Tk()
@@ -20,3 +23,4 @@ root.geometry("200x200")
 submit = Button(root, text ="PLAY 21", command = start)
 submit.place(relx = .42, rely = .5)
 root.mainloop()
+os._exit(0)

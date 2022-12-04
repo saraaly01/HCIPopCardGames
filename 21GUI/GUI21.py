@@ -7,12 +7,10 @@ import os, sys, time
 from gtts import gTTS
 import queue, threading
 
-global root, hitButton, standButton, flippedCard, end, outPut, playAgainButton, rootIn2, standCalled
+global root, hitButton, standButton, flippedCard, end, outPut, playAgainButton, standCalled
 output = queue.Queue()  # output queue will hold messages that a thread will output with voice
 deck = pydealer.Deck()  # card deck
-#deck.shuffle()  # shuffle the deck
-#player_hand = pydealer.Stack()  # player's cards
-#dealer_hand = pydealer.Stack()  # dealer's cards
+
 
 
 # outPutAudio is one of the worker functions
@@ -68,7 +66,7 @@ def audioListener():
 def playAgain():
     # this does not work
     root.destroy()
-    main(rootIn2)
+    main()
 
 
 # function when user wants to hit
@@ -193,13 +191,11 @@ def finish():
     output.put("The result of the game is " + result)
     output.put("Say again to play again or say quit to quit.")
     end = 1  # global end variable is assigned so that playagin button can pop up
-    quitButton = Button(root, text="QUIT", font=("Comic Sans MS", 15), command=lambda:quit())
-    quitButton.place(relx=.45, rely=.8)
 
 
 
-def main(rootIN):
-    global root, dealer_hand, player_hand, deck, xDealer, xPlayer, hitButton, standButton, flippedCard, playAgainButton, end, rootIn2
+def main():
+    global root, dealer_hand, player_hand, deck, xDealer, xPlayer, hitButton, standButton, flippedCard, playAgainButton, end
     global standCalled
     end = 0
     standCalled = 0
@@ -208,16 +204,17 @@ def main(rootIN):
     xDealer = .05  # this is the y value that will be used (and changed) to place the cards on the GUI on the dealers sie
 
     deck.shuffle()  # shuffling one more time as it seems to help vary the cards more
-    rootIn2 = rootIN
-    root = Toplevel(rootIN)  # creates a new window from the menu
-    root.title('PopCardGames: 21')
-    root['background'] = '#8B0000'  # changes it to the red
+
+    #creates window
+    root = Tk()
+    root.title('21')
+    root['background']='#8B0000'
     # window width of screen
-    window_width = rootIN.winfo_screenwidth()
-    # window height of screen
-    window_height = rootIN.winfo_screenheight()
-    # set root winow to screen size
-    root.geometry("%dx%d" % (window_width, window_height))
+    window_width= root.winfo_screenwidth()
+    # window height of screen              
+    window_height= root.winfo_screenheight()
+    # set root winow to screen size           
+    root.geometry("%dx%d" % (window_width,  window_height))
 
     # segment puts text on the screen
     gameTitle = Label(root, text="21", font=("Comic Sans MS", 30))
@@ -284,3 +281,6 @@ def main(rootIN):
         standAction()
     else:
         output.put("Say yes anytime to hit and say no anytime to stand")
+    root.mainloop()
+    end = 1
+    os._exit(0)
