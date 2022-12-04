@@ -3,10 +3,11 @@ from tkinter import *
 from PIL import Image, ImageTk
 import numpy as np
 import speech_recognition as sr
+
 import os, sys, time
 from gtts import gTTS
 import queue, threading
-
+from instructions21 import instructions
 global root, hitButton, standButton, flippedCard, end, outPut, playAgainButton, standCalled
 output = queue.Queue()  # output queue will hold messages that a thread will output with voice
 deck = pydealer.Deck()  # card deck
@@ -259,6 +260,9 @@ def main():
     playAgainButton = Button(root, text="Play Again", font=("Comic Sans MS", 15), command=lambda: playAgain(),
                              state=DISABLED)
     playAgainButton.place(relx=.45, rely=.7)
+
+    instructionButton = Button(root, text="?", font=("Comic Sans MS",30), command=lambda: instructions(root))
+    instructionButton.place(relx = .8,rely = .8)
 
     # creates two threads. Listener and Speaker. Listener's worker function continuosuly listens for output.
     # Speaker's work function continuously looks if they need to output something
