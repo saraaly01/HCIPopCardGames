@@ -24,6 +24,7 @@ def getInput(desiredWords):
         audio = r.listen(source)
     try:
         rawAudioInput = r.recognize_google(audio, language="en")
+        print("raw output" + rawAudioInput)
         #splits the audio into a list of words
         splitInput = re.split("[\W]+", rawAudioInput)
         # print("Raw Audio Input: ", rawAudioInput)
@@ -36,13 +37,8 @@ def getInput(desiredWords):
             for desiredWord in desiredWords:
                 # if the current word from the input is a match:
                 if inputWord.lower() == desiredWord.lower():
-                    
-                    #if its the first word to be found:
-                    if foundWord == "":
-                        foundWord = inputWord
-                    #if a different word has already been found:
-                    elif foundWord != inputWord:
-                        return "More than one desired word was found."
+                    foundWord = inputWord
+
         
         if foundWord == "":
             return "No desired word was found."
@@ -55,6 +51,5 @@ def getInput(desiredWords):
     except sr.UnknownValueError:
         return "unable to recognize speech"
 
-getInput()
 
 

@@ -7,6 +7,8 @@ import os, sys, time
 from gtts import gTTS
 import queue, threading
 from instructions21 import instructions21
+from audioListener import getInput
+
 global root, hitButton, standButton, flippedCard, end21, outPut, playAgainButton, standCalled, audioChoice
 output = queue.Queue()  # output queue will hold messages that a thread will output with voice
 deck = pydealer.Deck()  # card deck
@@ -39,14 +41,7 @@ def audioListener():
     r = sr.Recognizer()
     mic = sr.Microphone()
     while True:  # constantly using the microphone to check if the user is saying something
-        with mic as source:
-            try:
-                r.adjust_for_ambient_noise(source=source, duration=1)
-                audio = r.listen(source, timeout=5)
-                msg = r.recognize_google(audio, language='en')
-                print(msg)  # for debugging reasons prints msg
-            except:
-                msg = "-"
+        msg = getInput(("yes", "no", "quit", "instructions", "help", "instruction", "again"))
         msg = msg.lower()
         if msg == "yes" and standCalled == 0:  # user picked hit and calls hit function
             output.put("You picked hit.")

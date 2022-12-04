@@ -40,14 +40,7 @@ def audioListener():
     r = sr.Recognizer()
     mic = sr.Microphone()
     while True: #constantly using the microphone to check if the user is saying something
-        with mic as source:
-            try:
-                r.adjust_for_ambient_noise(source=source, duration=1)
-                audio = r.listen(source, timeout=5)
-                msg = r.recognize_google(audio, language='en')
-                print(msg)  #for debugging reasons prints msg
-            except:
-                msg = "-"
+        msg = getInput(("flip", "war", "score", "instructions", "help", "instruction", "quit"))
         msg = msg.lower()
         if msg== "flip":  #user picked flip and calls flipCard function if we are not waiting for a war
             if not warWait:
@@ -59,7 +52,7 @@ def audioListener():
         if msg == "instructions" or msg == "help" or msg == "instruction":
             instructionsWar(rootWar)
         if msg == "quit" or endWAR: #ends the program
-            endWAR= 1
+            quit()
             return
 
 def quit():
@@ -331,5 +324,5 @@ def intialize(audioFromMenu):
     output.put("Welcome to War. Say flip anytime to flip card. Say quit anytime to end")
     rootWar.mainloop()
     endWAR= 1
-    os._exit(0)
+    return
     
