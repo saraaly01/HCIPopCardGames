@@ -3,7 +3,6 @@ from tkinter import *
 from PIL import Image, ImageTk
 import numpy as np
 import speech_recognition as sr
-
 import os, sys, time
 from gtts import gTTS
 import queue, threading
