@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from tkinter import *
 from PIL import Image, ImageTk
 from GUI21 import *
@@ -20,6 +21,23 @@ import threading
 global root, end, outPut, k, gameDecision
 r = sr.Recognizer()
 mic = sr.Microphone()
+=======
+import pydealer
+from enum import Enum
+from tkinter import *
+from PIL import Image, ImageTk
+import numpy as np
+import speech_recognition as sr
+import os
+from gtts import gTTS
+import time
+import queue
+import threading
+
+
+global root, end, outPut, k, gameDecision
+
+>>>>>>> 188a7e7cd9b5d7fc32f9dedaf48e202f89ac6ea6
 
 def outPutAudio():
     global end
@@ -42,6 +60,7 @@ def speak(x):
 
 
 def audioListener():
+<<<<<<< HEAD
     """
     This is where we handle the asynchronous I/O. For example, it may be
     a 'select(  )'. One important thing to remember is that the thread has
@@ -51,6 +70,12 @@ def audioListener():
     msg = ''
     while True:
         #print("Taking in speaking input")
+=======
+    r = sr.Recognizer()
+    mic = sr.Microphone()
+    print("ENTERED")
+    while True:
+>>>>>>> 188a7e7cd9b5d7fc32f9dedaf48e202f89ac6ea6
         with mic as source:
             try:
                 r.adjust_for_ambient_noise(source=source, duration=1)
@@ -58,6 +83,7 @@ def audioListener():
                 msg = r.recognize_google(audio, language='en')
                 print(msg)
             except:
+<<<<<<< HEAD
                 #print("cant recognise speech")
                 msg = "-"
         if msg.lower() == "yes":
@@ -73,6 +99,12 @@ def audioListener():
             #output.put("You picked war")
             #Call War here (default to audio unless the user has changed it)
 
+=======
+                msg = "-"
+        if msg == "yes":
+            start_21()
+            return
+>>>>>>> 188a7e7cd9b5d7fc32f9dedaf48e202f89ac6ea6
 
 
 def start_21():
@@ -109,14 +141,23 @@ for size in sizes:
     )
     r.pack(fill='x', padx=5, pady=5)
 
+<<<<<<< HEAD
 submit = Button(root, text ="PLAY 21", command=lambda: start_21())
 
 audioListenerThread = threading.Thread(target=audioListener, args=())
+=======
+
+audioListenerThread = threading.Thread(target=audioListener)
+>>>>>>> 188a7e7cd9b5d7fc32f9dedaf48e202f89ac6ea6
 audioListenerThread.start()
 print("thread created")
 #audioSpeakerThread = threading.Thread(target=outPutAudio)
 #audioSpeakerThread.start()
+<<<<<<< HEAD
 
+=======
+submit = Button(root, text ="PLAY 21", command=lambda: start_21())
+>>>>>>> 188a7e7cd9b5d7fc32f9dedaf48e202f89ac6ea6
 submit.place(relx = .42, rely = .5)
 root.mainloop()
 

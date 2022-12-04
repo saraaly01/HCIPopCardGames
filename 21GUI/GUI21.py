@@ -1,131 +1,133 @@
 import pydealer
-from enum import Enum
 from tkinter import *
 from PIL import Image, ImageTk
-import time
 import numpy as np
 import speech_recognition as sr
-import os
-import sys
+import os, sys, time
 from gtts import gTTS
-import queue
-import time
-from playsound import playsound
-import threading
+import queue, threading
 
-global root, hitButton, flippedCard, end, outPut, k
-output = queue.Queue()
-k = 0
-end = 0
-xPlayer = 0
-xDealer = .05
-width = int(250/2.5)
-height = int(363/2.5)    
-deck = pydealer.Deck()
-deck.shuffle()
-player_hand = pydealer.Stack()
-dealer_hand = pydealer.Stack()
+global root, hitButton, standButton, flippedCard, end, outPut, playAgainButton, rootIn2
+output = queue.Queue()  # output queue will hold messages that a thread will output with voice
+deck = pydealer.Deck()  # card deck
+#deck.shuffle()  # shuffle the deck
+#player_hand = pydealer.Stack()  # player's cards
+#dealer_hand = pydealer.Stack()  # dealer's cards
 
-r = sr.Recognizer()
-mic = sr.Microphone()
+
+# outPutAudio is one of the worker functions
 def outPutAudio():
-    global end
-    while True:
-        while output.empty() == False:
+    while True:  # thread is constantly checking if there is a message on the queue it has to output
+        while output.empty() == False:  # if the queue is not empty the thread will get ready to output the message
             msg = output.get(0)
-            speak(msg)
-        if end:
+            hitButton['state'] = DISABLED  # while the computer is talking the user can not press the stand or hit button
+            standButton['state'] = DISABLED
+            # next three lines uses google's package for text to speech
+            myobj = gTTS(text=msg, lang='en', tld='us', slow=False)
+            myobj.save("test.mp3")
+            os.system("mpg123 test.mp3")
+        if end:  # if the game has been ended the thread can be terminated
+            playAgainButton['state'] = NORMAL
             return
+        else:  # else allow the hit and stand buttons to be used again
+            hitButton['state'] = NORMAL
+            standButton['state'] = NORMAL
 
-           
-def speak(x):
-    global k
-    k += 1
 
-    myobj = gTTS(text=x, lang='en', tld='us', slow=False)
-    myobj.save("test.mp3")
-    os.system("mpg123 test.mp3")
-
-def audioListener(root, hitButton, flippedCard):
-    global end
-    """
-    This is where we handle the asynchronous I/O. For example, it may be
-    a 'select(  )'. One important thing to remember is that the thread has
-    to yield control pretty regularly, by select or otherwise.
-    """
-    msg = ''
-    while True:
-        print("Taking in speaking input")
+# audioListener is the other worker function
+def audioListener():
+    r = sr.Recognizer()
+    mic = sr.Microphone()
+    while True:  # constantly using the microphone to check if the user is saying something
         with mic as source:
             try:
                 r.adjust_for_ambient_noise(source=source, duration=1)
                 audio = r.listen(source, timeout=5)
                 msg = r.recognize_google(audio, language='en')
-                print(msg)
+                print(msg)  # for debugging reasons prints msg
             except:
-                print("cant recognise speech")
                 msg = "-"
-        if msg == "yes":
+        msg = msg.lower()
+        if msg == "yes":  # user picked hit and calls hit function
             output.put("You picked hit.")
-            hitAction(root)
-          
-        if msg == "no":
+            hitAction()
+        if msg == "no":  # user picked stand and calls stand function
             output.put("You picked stand.")
-            standAction(hitButton, root, flippedCard)
-            end = 1
-        if end:
-            finish(root)
+            standAction()
+        if msg == "quit":
+            root.destroy()
+            sys.exit()
+        if msg == "again":
+            playAgain()
             return
 
-           
-            
 
-    
-def hitAction(root):
-    global end, xPlayer, player_hand, deck
+def playAgain():
 
-    tempCard = deck.deal(1)
-    output.put("You got a " + str(tempCard))
-    tempCardimg = insertImage(str(tempCard), root)
-    tempCardimg.place(relx=.12+ xPlayer, rely=.3)
-    player_hand += tempCard
-    xPlayer +=.05
-    currPlayerScore = str(hand_score(player_hand))
-    playerScore = Label(root, text= currPlayerScore, font=("Comic Sans MS", 20))
-    playerScore.place(relx=.3, rely = .1)
-    output.put("Your hand score is now " + str(currPlayerScore))
-    if hand_score(player_hand) >21:
-        standAction(hitButton, root, flippedCard)
-        end = 1
-    else:
-        end = 0
-    
-def standAction(hitButton, root, flippedCard):
-    global dealer_hand, deck, xDealer
+    # this does not work
+    root.destroy()
+    main(rootIn2)
+
+
+# function when user wants to hit
+def hitAction():
+    global root, xPlayer, player_hand, deck
+    tempCard = deck.deal(1)  # deals one card
+    output.put("You got a " + str(tempCard))  # computer outputs that they got this card
+    tempCardimg = insertImage(str(tempCard))
+    tempCardimg.place(relx=.12 + xPlayer, rely=.3)  # card is added to the GUI
+    player_hand += tempCard  # card is added to the players hand
+    xPlayer += .05  # variable represents where to place the card x wise, is incremented for the next card to be placed
+    currPlayerScore = str(hand_score(player_hand))  # the players current score
+    playerScore = Label(root, text=currPlayerScore, font=("Comic Sans MS", 20))
+    playerScore.place(relx=.3, rely=.1)  # the current score is placed/updated
+    output.put("Your hand score is now " + str(currPlayerScore))  # computer outputs their current score
+    if hand_score(player_hand) >= 21:  # if the computer hits 21 or busts stand is automatically called
+        standAction()
+
+
+# function if user chooses stand or stand is called
+def standAction():
+    global dealer_hand, deck, xDealer, flippedCard, root
+    # disables hit and stand as they can no longer play
     hitButton['state'] = DISABLED
+    standButton['state'] = DISABLED
+    # next three lines of code destroys the flipped card image on the GUI of the Dealer's hand and puts the front facing version
     flippedCard.destroy()
-    flippedCard= insertImage(str(dealer_hand[1]), root)
+    flippedCard = insertImage(str(dealer_hand[1]))
     flippedCard.place(relx=.58, rely=.3)
-    output.put("The dealer's hidden card was a" + str(dealer_hand[1]) + "There score is" + str(hand_score(dealer_hand)))
-    while hand_score(dealer_hand) < 17:
+    output.put(
+        "The dealer's hidden card was a" + str(dealer_hand[1]) + "Their score is now" + str(hand_score(dealer_hand)))
+    while hand_score(dealer_hand) < 17 and hand_score(player_hand) < 21:
+        # if the dealer's hand is less than 17, they have to continue to get more cards
+        # but this is only if the player did not win/bust
         tempCard = deck.deal(1)
         dealer_hand += tempCard
-
-        output.put("Dealer receives a " + str(tempCard) + "their score is now " + str(hand_score(dealer_hand)))
-        tempCardimg = insertImage(str(tempCard), root)
-        tempCardimg.place(relx=.67+ xDealer, rely=.3)
+        output.put("Dealer receives a " + str(tempCard) + "there score is now" + str(hand_score(dealer_hand)))
+        dealerScore = Label(root, text=str(hand_score(dealer_hand)), font=("Comic Sans MS", 20))
+        dealerScore.place(relx=.8, rely=.1)
+        tempCardimg = insertImage(str(tempCard))
+        tempCardimg.place(relx=.7 + xDealer, rely=.3)
         xDealer += .05
-
-    dealerScore = Label(root, text= str(hand_score(dealer_hand)), font=("Comic Sans MS", 20))
-    dealerScore.place(relx=.8, rely = .1)
+    dealerScore = Label(root, text=str(hand_score(dealer_hand)), font=("Comic Sans MS", 20))
+    dealerScore.place(relx=.8, rely=.1)
+    finish()  # calls finish function for results and score
     return
-def insertImage(cardPlayed,root):
+
+
+def insertImage(cardPlayed):
+    # function avoids redundant code by taking in the card and getting the label ready to place on the GUI
+    global root
+    width = int(
+        250 / 2.5)  # the width and height of the cards are resized because the actual jpeg file is too big for the screen
+    height = int(363 / 2.5)
     cardOutput = Image.open("cards\\" + str(cardPlayed) + ".png")
     test = cardOutput.resize((width, height))
     test = ImageTk.PhotoImage(test)
     imglabel = Label(root, image=test)
     imglabel.image = test
     return imglabel
+
 
 # given a hand, returns hand score
 def hand_score(x):
@@ -148,102 +150,124 @@ def hand_score(x):
     score = 0
     for i in mylist:
         score += i
+    if score > 21:
+        if 11 in mylist:  # deals with ACE (21 rules allows ACE to be either 1 or 21)
+            mylist.remove(11)
+            mylist.append(1)
+            score = 0
+            for i in mylist:
+                score += i
     return score
 
 
-def finish(root):
-    playerScore = hand_score(player_hand) 
-    dealerScore = hand_score(dealer_hand) 
+def finish():
+    # function wraps up game by determing result and outputing the result
+    global end
+    playerScore = hand_score(player_hand)
+    dealerScore = hand_score(dealer_hand)
     output.put("Your final score is " + str(playerScore) + "The dealer's final score is" + str(dealerScore))
-    gameResult = ""
-    if dealerScore == playerScore:  # if tie
-        gameResult = "Push"
-    elif  dealerScore >21 and playerScore > 21:
-        gameResult = "Both the player and dealer bust"
-    elif dealerScore > 21:  # if dealer bust
-        gameResult = "Dealer Bust"
-    elif dealerScore > playerScore:  # if dealer > player
-        gameResult = "Dealer Won"
-    elif playerScore == 21:  # if player got 21
-        gameResult = "Player hits 21. Player Wins."
-    elif playerScore > 21:  # if player bust
-        gameResult = "Player Bust"
-    else:  # if player > dealer
-        gameResult = "Player Wins"
-    resultLabel = Label(root, text= gameResult, font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
-    resultLabel.place(relx =.4, rely = .8)
-    output.put("The result of the game is " + gameResult)
+    result = ""
+    if playerScore == 21:
+        result = "Player hit 21. Player Wins"
+    elif playerScore > 21:
+        result = "Player Bust"
+    elif dealerScore > 21:
+        result = "Dealer Bust"
+    elif playerScore <= 21 and playerScore > dealerScore:
+        result = "Player Wins"
+    elif dealerScore <= 21 and dealerScore > playerScore:
+        result = "Dealer Wins"
+    elif playerScore == dealerScore:
+        result = "Push. The game is a tie."
+    resultLabel = Label(root, text=result, font=("Comic Sans MS", 20), bg='#8B0000', relief="solid")
+    resultLabel.place(relx=.4, rely=.8)
+    output.put("The result of the game is " + result)
+    output.put("Say again to play again or say quit to quit.")
+    end = 1  # global end variable is assigned one so that earlier threads can be ended
 
-    
 
 def main(rootIN):
-    global root, dealer_hand, player_hand, deck, xDealer, xPlayer, hitButton, flippedCard, k
-    deck.shuffle()
+    global root, dealer_hand, player_hand, deck, xDealer, xPlayer, hitButton, standButton, flippedCard, playAgainButton, end, rootIn2
+    end = 0
+    # many global variables to use threads seamlessly
+    xPlayer = 0  # this is the x value that will be used (and changed) to place the cards on the GUI on the players side
+    xDealer = .05  # this is the y value that will be used (and changed) to place the cards on the GUI on the dealers sie
 
-
-
-    keepPlaying = True
-    root = Toplevel(rootIN)
-    root.title('PopCardGames')
-    root['background']='#8B0000'
+    deck.shuffle()  # shuffling one more time as it seems to help vary the cards more
+    rootIn2 = rootIN
+    root = Toplevel(rootIN)  # creates a new window from the menu
+    root.title('PopCardGames: 21')
+    root['background'] = '#8B0000'  # changes it to the red
     # window width of screen
-    window_width= rootIN.winfo_screenwidth()
-    # window height of screen              
-    window_height= rootIN.winfo_screenheight()
+    window_width = rootIN.winfo_screenwidth()
+    # window height of screen
+    window_height = rootIN.winfo_screenheight()
+    # set root winow to screen size
+    root.geometry("%dx%d" % (window_width, window_height))
 
-    # set root winow to screen size           
-    root.geometry("%dx%d" % (window_width,  window_height))
-    gameTitle = Label(root, text= "21", font=("Comic Sans MS", 30))
-    gameTitle.place(relx = 0.45, rely = 0)
+    # segment puts text on the screen
+    gameTitle = Label(root, text="21", font=("Comic Sans MS", 30))
+    gameTitle.place(relx=0.45, rely=0)
+    player = Label(root, text="PLAYER", font=("Comic Sans MS", 20), bg='#8B0000', relief="solid")
+    player.place(relx=.2, rely=.1)
+    dealer = Label(root, text="DEALER", font=("Comic Sans MS", 20), bg='#8B0000', relief="solid")
+    dealer.place(relx=.7, rely=.1)
 
-    player = Label(root, text= "PLAYER", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
-    player.place(relx =.2, rely = .1)
-    dealer = Label(root, text= "DEALER", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
-    dealer.place(relx =.7, rely = .1)
-    cardBack = insertImage("card", root)
+    # inserts the flipped card (backside) of the dealer's on the dealers side of the GUI
+    cardBack = insertImage("card")
     cardBack.place(relx=.43, rely=.15)
 
-    dealer_hand += deck.deal(1)
-    player_hand += deck.deal(2)
 
+    deck.shuffle()  # shuffle the deck
+    player_hand = pydealer.Stack()  # player's cards
+    dealer_hand = pydealer.Stack()  # dealer's cards
+
+    dealer_hand += deck.deal(1)  # deals the dealer one card for now (the one that is showing)
+    player_hand += deck.deal(2)  # deals the player their two cards
 
     currDealerScore = str(hand_score(dealer_hand))
-    dealerScore = Label(root, text= currDealerScore, font=("Comic Sans MS", 20))
-    dealerScore.place(relx=.8, rely = .1)
+    dealerScore = Label(root, text=currDealerScore, font=("Comic Sans MS", 20))
+    dealerScore.place(relx=.8,
+                      rely=.1)  # adds the dealers score on the GUI and then deals their second card so that the user doesn't know it
+    dealer_hand += deck.deal(1)  # second card
 
-    dealer_hand += deck.deal(1) #second card 
-    playerScore = Label(root, text= str(hand_score(player_hand)), font=("Comic Sans MS", 20))
-    playerScore.place(relx=.3, rely = .1)
+    playerScore = Label(root, text=str(hand_score(player_hand)), font=("Comic Sans MS", 20))
+    playerScore.place(relx=.3, rely=.1)  # places the player score on the screen
 
-    imgPlayed = insertImage(dealer_hand[0],root)
-    imgPlayed.place(relx=0.67, rely=.3) 
-    
-    hitButton = Button(root, text = "HIT", font=("Comic Sans MS", 15), command=lambda: hitAction(root))
-    hitButton.place(relx= .3, rely=.7)
-
-   
-    flippedCard= insertImage("card", root)
+    imgPlayed = insertImage(dealer_hand[0])  # inserts the showing card of the Dealer's on the screen
+    imgPlayed.place(relx=0.67, rely=.3)
+    flippedCard = insertImage("card")  # inserts the flipped card (backside)on the Dealer's side
     flippedCard.place(relx=.58, rely=.3)
 
-    standButton = Button(root, text = "STAND", font=("Comic Sans MS", 15),  command=lambda: standAction(hitButton, root, flippedCard))
-    standButton.place(relx= .6, rely=.7)
-    
-    audioListenerThread = threading.Thread(target=audioListener, args=(root,hitButton, flippedCard))
+    # buttons on the screen to press to hit, stand with the functions to call if the buttons are pressed
+    hitButton = Button(root, text="HIT", font=("Comic Sans MS", 15), command=lambda: hitAction())
+    hitButton.place(relx=.3, rely=.7)
+    standButton = Button(root, text="STAND", font=("Comic Sans MS", 15), command=lambda: standAction())
+    standButton.place(relx=.6, rely=.7)
+
+    # might be removed
+    playAgainButton = Button(root, text="Play Again", font=("Comic Sans MS", 15), command=lambda: playAgain(),
+                             state=DISABLED)
+    playAgainButton.place(relx=.45, rely=.7)
+
+    # creates two threads. Listener and Speaker. Listener's worker function continuosuly listens for output.
+    # Speaker's work function continuously looks if they need to output something
+    audioListenerThread = threading.Thread(target=audioListener)
     audioListenerThread.start()
     audioSpeakerThread = threading.Thread(target=outPutAudio)
     audioSpeakerThread.start()
-    
+
+    # displays the players card
     for card in player_hand:
-        imgPlayed = insertImage(card,root)
-        imgPlayed.place(relx=0.12 + xPlayer, rely=.3) 
-        xPlayer += .05
+        imgPlayed = insertImage(card)
+        imgPlayed.place(relx=0.12 + xPlayer, rely=.3)
+        xPlayer += .05  # increments the x value to space out the cards on GUI
         output.put("You have a " + str(card))
+
     output.put("Your hand score is " + str(hand_score(player_hand)))
     output.put("Dealer card showing is a " + str(dealer_hand[0]))
-    output.put("Say yes anytime to hit and say no anytime to stand")
 
-
-
-
-if __name__ == '__main__':
-    main()
+    if hand_score(player_hand) == 21:  # if player gets 21 off the bat stand is called
+        standAction()
+    else:
+        output.put("Say yes anytime to hit and say no anytime to stand")
