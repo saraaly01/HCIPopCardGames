@@ -7,24 +7,24 @@ import os, sys, time
 from gtts import gTTS
 import queue, threading
 from instructionsWar import instructionsWar
-from audioListener import getInput
+from globalFunctions import *
 
-global output, endWAR
+global outputWAR, endWAR
 global computer_hand, player_hand, cardPlayedP, cardPlayedC, cardBackPlayer, cardBackComputer
 global rootWar, warWait, flip
 endWAR= 0 #signals the endWARof the game
 warWait = 0 #variable determines if we are awaiting a war sequence 
-output = queue.Queue()  #output queue will hold messages that a thread will output with voice
+outputWAR = queue.Queue()  #output queue will hold messages that a thread will output with voice
 
 
 #outPutAudio is one of the worker functions
 def outPutAudioWar():
-    global flip, output, endWAR
+    global flip, outputWAR, endWAR
     while True: #thread is constantly checking if there is a message on the queue it has to output
         if endWAR:
             return
-        while output.empty() == False: # if the queue is not empty the thread will get ready to output the message
-            msg = output.get(0)
+        while outputWAR.empty() == False: # if the queue is not empty the thread will get ready to output the message
+            msg = outputWAR.get(0)
             flip['state'] = DISABLED #if output is being said, user can not hit the button
             #next three lines uses google's package for text to speech
             myobj = gTTS(text=msg, lang='en', tld='us', slow=False)  
@@ -37,7 +37,7 @@ def outPutAudioWar():
 
 #audioListener is the other worker function
 def audioListenerWar(): 
-    global output,endWAR, warWait
+    global outputWAR,endWAR, warWait
     while True: #constantly using the microphone to check if the user is saying something
         print("testing")
         msg = getInput(("flip", "war", "score", "instructions", "help", "instruction", "quit"))
@@ -48,14 +48,14 @@ def audioListenerWar():
         if msg == "war":
             cardTie() #cardTie is the function that deals with the war
         if msg== "score": #prints out how many cards each player has
-            output.put("You have" + str(player_hand.size) + "cards. Computer has" + str(computer_hand.size) + "cards.")
+            outputWAR.put("You have" + str(player_hand.size) + "cards. Computer has" + str(computer_hand.size) + "cards.")
         if msg == "instructions" or msg == "help" or msg == "instruction":
             instructionsWar(rootWar)
         if msg == "quit" or endWAR: #ends the program
-            quit()
+            quitWar()
             return
 
-def quit():
+def quitWar():
     global endWar
     endWar = 1
     rootWar.destroy()
@@ -115,7 +115,7 @@ def cardTie():
         if player_hand.size != 0:
             cardPlayedPcurr = player_hand.random_card(remove = True)
             cardPlayedPTie.append(cardPlayedPcurr)
-            output.put("You flip a " + str(cardPlayedPcurr))
+            outputWAR.put("You flip a " + str(cardPlayedPcurr))
             img= insertImage(cardPlayedPcurr,rootWar)
             img.place(relx = playerX + (.05 *i), rely = .3)
             labels.append(img)
@@ -124,7 +124,7 @@ def cardTie():
 
             cardPlayedCcurr = computer_hand.random_card(remove = True)
             cardPlayedCTie.append(cardPlayedCcurr)
-            output.put("Computer flips a " + str(cardPlayedCcurr))
+            outputWAR.put("Computer flips a " + str(cardPlayedCcurr))
 
             img= insertImage(cardPlayedCcurr,rootWar)
             img.place(relx = computerX - (.05 *i), rely = .3)
@@ -133,7 +133,7 @@ def cardTie():
     valueCompareTie = compareCards(str(cardPlayedPcurr), str(cardPlayedCcurr))
 
     if valueCompareTie == 0: # cards are equal 
-        output.put("Tie again. Everyone gets their cards back.")
+        outputWAR.put("Tie again. Everyone gets their cards back.")
         tie = Label(rootWar, text= "TIE, CARDS BACK!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
         tie.place(relx =.45, rely = .2)
         for cardP in cardPlayedPTie:
@@ -144,7 +144,7 @@ def cardTie():
         player_hand.add(cardPlayedP)
         computer_hand.add(cardPlayedC)
     elif valueCompareTie == 1:
-        output.put("You receive the cards")
+        outputWAR.put("You receive the cards")
         playerWin = Label(rootWar, text= "PLAYER's WIN!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
         playerWin.place(relx =.15, rely = .2)
         labels.append(playerWin)
@@ -155,7 +155,7 @@ def cardTie():
         player_hand.add(cardPlayedP)
         player_hand.add(cardPlayedC)
     elif valueCompareTie == 2:
-        output.put("Computer receives the cards")
+        outputWAR.put("Computer receives the cards")
         computerWin = Label(rootWar, text= "COMPUTER's WIN!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
         computerWin.place(relx =.65, rely = .2)
         labels.append(computerWin)
@@ -173,15 +173,7 @@ def cardTie():
         finish()
     return
 
-def insertImage(cardPlayed,rootWar):
-    width = int(250/2.5)
-    height = int(363/2.5)
-    cardOutput = Image.open("cards\\" + str(cardPlayed) + ".png")
-    test = cardOutput.resize((width, height))
-    test = ImageTk.PhotoImage(test)
-    imglabel = Label(rootWar, image=test)
-    imglabel.image = test
-    return imglabel
+
 
 def flipCard():
     global rootWar, labels
@@ -212,11 +204,11 @@ def flipCard():
     imgPlayedP = insertImage(cardPlayedP,rootWar)
     imgPlayedP.place(relx=0.12, rely=.3) 
     labels.append(imgPlayedP)
-    output.put("You flip a " + str(cardPlayedP) + "The computer flips a " + str(cardPlayedC))
+    outputWAR.put("You flip a " + str(cardPlayedP) + "The computer flips a " + str(cardPlayedC))
 
     valueCompare = compareCards(str(cardPlayedP), str(cardPlayedC))
     if valueCompare == 0: # cards are equal 
-        output.put("Cards Tied. Say WAR to continue. ")
+        outputWAR.put("Cards Tied. Say WAR to continue. ")
         tie = Label(rootWar, text= "TIE, WAR!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
         tie.place(relx =.45, rely = .2)
         labels.append(tie)
@@ -226,7 +218,7 @@ def flipCard():
         warWait = 1
 
     if valueCompare == 1:
-        output.put("You receive the cards")
+        outputWAR.put("You receive the cards")
         playerWin = Label(rootWar, text= "PLAYER's WIN!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
         playerWin.place(relx =.15, rely = .2)
         labels.append(playerWin)
@@ -235,7 +227,7 @@ def flipCard():
         flip['state'] = NORMAL
 
     elif valueCompare == 2: #computer won the card
-        output.put("Computer receives the cards")
+        outputWAR.put("Computer receives the cards")
         computerWin = Label(rootWar, text= "COMPUTER's WIN!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
         computerWin.place(relx =.65, rely = .2)
         labels.append(computerWin)
@@ -250,17 +242,17 @@ def finish():
     if player_hand.size == 0:
         playerWinsGame = Label(rootWar, text = "COMPUTER WINS. GAME OVER", font=("Comic Sans MS", 40))
         playerWinsGame.place(relx= .4, rely=.6)
-        output("Computer Wins. Game Over")
+        outputWAR("Computer Wins. Game Over")
 
     elif computer_hand.size == 0:
         computerWinsGame = Label(rootWar, text = "PLAYER WINS. GAME OVER", font=("Comic Sans MS", 40))
         computerWinsGame.place(relx= .4, rely=.6)
-        output("Player Wins. Game Over")
+        outputWAR("Player Wins. Game Over")
 
     return
 
 def intialize(audioFromMenu):
-    global rootWar, labels, flip, output, endWAR
+    global rootWar, labels, flip, outputWAR, endWAR
     global cardBackPlayer, cardBackComputer,  cardPlayedP, cardPlayedC, computer_hand, player_hand
     labels = []
     deck = pydealer.Deck()
@@ -322,7 +314,7 @@ def intialize(audioFromMenu):
         audioListenerThread = threading.Thread(target=audioListenerWar)
         audioListenerThread.start()
 
-    output.put("Welcome to War. Say flip anytime to flip card. Say quit anytime to end")
+    outputWAR.put("Welcome to War. Say flip anytime to flip card. Say quit anytime to end")
     rootWar.mainloop()
     endWAR= 1
     os._exit(0)

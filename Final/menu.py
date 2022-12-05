@@ -6,7 +6,8 @@ from gtts import gTTS
 import queue, threading
 from GUI21 import main21
 from warGUI import intialize
-from audioListener import getInput
+from globalFunctions import *
+
 global rootMenu,  outPutMenu, var, endMenu, btnWar, btn21
 endMenu = 0
 outPutMenu = queue.Queue()  # output queue will hold messages that a thread will output with voice
@@ -106,11 +107,11 @@ def main():
 
     audioButton = Radiobutton(rootMenu, text ="Audio", font=("Helvetica", 50), variable=var, value=1)
     audioButton.place(relx = 0.05, rely = .3)
-    slientButton = Radiobutton(rootMenu, text ="Slient",  font=("Helvetica", 50), variable=var, value=2)
+    slientButton = Radiobutton(rootMenu, text ="Silent",  font=("Helvetica", 50), variable=var, value=2)
     slientButton.place(relx = .55, rely = .3)
-    btn21 = Button(rootMenu, text =" 21 ", font=("Helvetica", 50), command=lambda: choose_21())
+    btn21 = Button(rootMenu, text =" 21 ", font=("Helvetica", 50), command=lambda: choose_21(), state=DISABLED)
     btn21.place(relx = .05, rely = .55)
-    btnWar = Button(rootMenu, text ="WAR", font=("Helvetica", 50), command=lambda: choose_war())
+    btnWar = Button(rootMenu, text ="WAR", font=("Helvetica", 50), command=lambda: choose_war(), state=DISABLED)
     btnWar.place(relx = .55, rely = .55)
     rootMenu.mainloop()
     endMenu = 1

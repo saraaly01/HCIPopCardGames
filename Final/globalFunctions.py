@@ -1,6 +1,12 @@
+
+import pydealer
+from tkinter import *
+from PIL import Image, ImageTk
+import numpy as np
 import speech_recognition as sr
-from gtts import gTTS
 import os, sys, time
+from gtts import gTTS
+import queue, threading
 import re
 
 # If the function is acting up. Uncomment lines 29 and 30 in order to see more of whats happening.
@@ -53,6 +59,14 @@ def getInput(desiredWords):
             return "-"
         except sr.UnknownValueError:
             return "-"
-
+def insertImage(cardPlayed,rootWar):
+    width = int(250/2.5)
+    height = int(363/2.5)
+    cardOutput = Image.open("cards\\" + str(cardPlayed) + ".png")
+    test = cardOutput.resize((width, height))
+    test = ImageTk.PhotoImage(test)
+    imglabel = Label(rootWar, image=test, borderwidth=0, highlightthickness=0)
+    imglabel.image = test
+    return imglabel
 
 

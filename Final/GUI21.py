@@ -7,10 +7,9 @@ import os, sys, time
 from gtts import gTTS
 import queue, threading
 from instructions21 import instructions21
-from audioListener import getInput
-
+from globalFunctions import *
 global root, hitButton, standButton, flippedCard, end21, outPut, playAgainButton, standCalled, audioChoice
-global rootInstructionWindow, instructionString
+
 output = queue.Queue()  # output queue will hold messages that a thread will output with voice
 deck = pydealer.Deck()  # card deck
 
@@ -38,7 +37,7 @@ def outPutAudio():
 
 # audioListener is the other worker function
 def audioListener():
-    global standCalled, rootInstructionWindow, instructionString
+    global standCalled
     standCalled = 0
     while True:  # constantly using the microphone to check if the user is saying something
         msg = getInput(("yes", "no", "quit", "instructions", "help", "instruction", "again"))
@@ -54,8 +53,7 @@ def audioListener():
             quit()
             return
         if msg == "instructions" or msg == "help" or msg == "instruction":
-            rootInstructionWindow, instructionString = instructions21(root)
-            output.put(instructionString)
+            instructions21(root, audioChoice)
         if msg == "again" and standCalled:
             playAgain()
             return
@@ -258,7 +256,7 @@ def main21(audioFromMenu):
     standButton.place(relx=.6, rely=.7)
 
 
-    instructionButton = Button(root, text="?", font=("Comic Sans MS",30), command=lambda: instructions21(root))
+    instructionButton = Button(root, text="?", font=("Comic Sans MS",30), command=lambda: instructions21(root,audioChoice))
     instructionButton.place(relx = .8,rely = .8)
 
     # creates two threads. Listener and Speaker. Listener's worker function continuosuly listens for output.
