@@ -5,10 +5,10 @@ import numpy as np
 import speech_recognition as sr
 import os, sys, time
 from gtts import gTTS
-import queue, threading
+import queue, threading, subprocess
 from instructions21 import *
 from globalFunctions import *
-global root, hitButton, standButton, flippedCard, end21, outPut, playAgainButton, standCalled, audioChoice
+global root, hitButton, standButton, flippedCard, end21, outPut, playAgainButton, standCalled, audioChoice, process
 
 output = queue.Queue()  # output queue will hold messages that a thread will output with voice
 deck = pydealer.Deck()  # card deck
@@ -17,7 +17,7 @@ deck = pydealer.Deck()  # card deck
 
 # outPutAudio is one of the worker functions
 def outPutAudio():
-    global output, root, playAgainButton
+    global output, root, playAgainButton, process
     while True:  # thread is constantly checking if there is a message on the queue it has to output
         while output.empty() == False:  # if the queue is not empty the thread will get ready to output the message
             msg = output.get(0)
@@ -26,7 +26,7 @@ def outPutAudio():
             # next three lines uses google's package for text to speech
             myobj = gTTS(text=msg, lang='en', tld='us', slow=False)
             myobj.save("test.mp3")
-            os.system("mpg123 test.mp3")
+            process = subprocess.Popen(["mpg123", "test.mp3"], universal_newlines=True)
         if end21:  # if the game has been end21ed the thread can be terminated
             playAgainButton.place(relx=.45, rely=.7)
             return
@@ -37,7 +37,7 @@ def outPutAudio():
 
 # audioListener is the other worker function
 def audioListener():
-    global standCalled
+    global standCalled, process
     standCalled = 0
     while True:  # constantly using the microphone to check if the user is saying something
         msg = getInput(("yes", "no", "quit", "instructions", "help", "instruction", "again"))
@@ -53,9 +53,10 @@ def audioListener():
             quit()
             return
         if msg == "instructions" or msg == "help" or msg == "instruction":
-            instructions21(root, audioChoice)
-        if msg == "again" and standCalled:
-            playAgain()
+            process.terminate()
+            instructions21(audioChoice)
+        if msg == "again":
+            playAgainButton.invoke()
             return
 
 
@@ -152,13 +153,13 @@ def hand_score(x):
 
 def finish():
     # function wraps up game by determing result and outputing the result
-    global end21, playAgainButton
+    global end21
     playerScore = hand_score(player_hand)
     dealerScore = hand_score(dealer_hand)
     output.put("Your final score is " + str(playerScore) + "The dealer's final score is" + str(dealerScore))
     result = ""
     if playerScore == 21:
-        result = "Player hit 21. Player Wins"
+        result = "Player Wins"
     elif playerScore > 21:
         result = "Player Bust"
     elif dealerScore > 21:
@@ -174,14 +175,13 @@ def finish():
     output.put("The result of the game is " + result)
     output.put("Say again to play again or say quit to quit.")
     end21 = 1  # global end21 variable is assigned so that playagin button can pop up
-    playAgainButton.place(relx=.45, rely=.7)
 
 
 
 
 def main21(audioFromMenu):
     
-    global root, dealer_hand, player_hand, deck, xDealer, xPlayer, hitButton, standButton, flippedCard, playAgainButton, end21
+    global root, dealer_hand, player_hand, deck, xDealer, xPlayer, hitButton, standButton, flippedCard,  end21, playAgainButton
     global standCalled, audioChoice
     audioChoice = audioFromMenu
     end21 = 0
@@ -243,7 +243,7 @@ def main21(audioFromMenu):
     standButton.place(relx=.6, rely=.7)
 
 
-    instructionButton = Button(root, text="?", font=("Comic Sans MS",30), command=lambda: instructions21(root,audioChoice))
+    instructionButton = Button(root, text="?", font=("Comic Sans MS",30), command=lambda: instructions21(audioChoice))
     instructionButton.place(relx = .8,rely = .8)
 
     # creates two threads. Listener and Speaker. Listener's worker function continuosuly listens for output.
@@ -260,14 +260,23 @@ def main21(audioFromMenu):
         imgPlayed.place(relx=0.12 + xPlayer, rely=.3)
         xPlayer += .05  # increments the x value to space out the cards on GUI
         output.put("You have a " + str(card))
-    playAgainButton = Button(root, text="Play Again", font=("Comic Sans MS", 15), command=lambda: playAgain())
+    playAgainButton = Button(root, text="RESTART", font=("Comic Sans MS", 15), command=lambda: playAgain())
+    playAgainButton.place(relx=.45, rely=.7)
+
     output.put("Your hand score is " + str(hand_score(player_hand)))
     output.put("Dealer card showing is a " + str(dealer_hand[0]))
 
     if hand_score(player_hand) == 21:  # if player gets 21 off the bat stand is called
         standAction()
     else:
-        output.put("Say yes anytime to hit and say no anytime to stand")
+        output.put("Welcome to 21. At anytime say yes to hit, no to stand, quit to quit, and again to restart.")
+    
+    if audioChoice == 1:
+        commands21 = Label(root, text= "Welcome to 21. Press hit button or say 'yes' to receive a card and stand or 'no' to stand.\nAt anytime you can say 'quit' or 'restart'.", font=("Arial", 10))
+    elif audioChoice == 2:
+        commands21 = Label(root, text= "Welcome to 21. Press hit button to receive a card and stand to stand.", font=("Arial", 10))
+    commands21.place(relx = .1, rely = .65)
+
     root.mainloop()
     end21 = 1
     os._exit(0)

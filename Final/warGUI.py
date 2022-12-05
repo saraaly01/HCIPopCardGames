@@ -145,7 +145,7 @@ def cardTie():
         computer_hand.add(cardPlayedC)
     elif valueCompareTie == 1:
         outputWAR.put("You receive the cards")
-        playerWin = Label(rootWar, text= "PLAYER's WIN!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
+        playerWin = Label(rootWar, text= "PLAYER's CARDS!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
         playerWin.place(relx =.15, rely = .2)
         labels.append(playerWin)
         for cardP in cardPlayedPTie:
@@ -156,7 +156,7 @@ def cardTie():
         player_hand.add(cardPlayedC)
     elif valueCompareTie == 2:
         outputWAR.put("Computer receives the cards")
-        computerWin = Label(rootWar, text= "COMPUTER's WIN!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
+        computerWin = Label(rootWar, text= "COMPUTER's CARDS!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
         computerWin.place(relx =.65, rely = .2)
         labels.append(computerWin)
         for cardP in cardPlayedPTie:
@@ -219,7 +219,7 @@ def flipCard():
 
     if valueCompare == 1:
         outputWAR.put("You receive the cards")
-        playerWin = Label(rootWar, text= "PLAYER's WIN!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
+        playerWin = Label(rootWar, text= "PLAYER's CARDS!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
         playerWin.place(relx =.15, rely = .2)
         labels.append(playerWin)
         player_hand.add(cardPlayedC)
@@ -228,7 +228,7 @@ def flipCard():
 
     elif valueCompare == 2: #computer won the card
         outputWAR.put("Computer receives the cards")
-        computerWin = Label(rootWar, text= "COMPUTER's WIN!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
+        computerWin = Label(rootWar, text= "COMPUTER's CARDS!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
         computerWin.place(relx =.65, rely = .2)
         labels.append(computerWin)
 

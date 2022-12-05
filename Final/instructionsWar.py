@@ -3,7 +3,6 @@ import speech_recognition as sr
 import os, sys, time
 from gtts import gTTS
 import queue, threading
-
 outputInstructWar =  queue.Queue() 
 def outPutAudioWarInstructWar(rootWarI):
     global outputInstructWar

@@ -2,22 +2,23 @@ from tkinter import *
 import speech_recognition as sr
 import os, sys, time
 from gtts import gTTS
-import queue, threading
+import queue, threading, subprocess
 
+global process21
 outputInstruct21 =  queue.Queue() 
-def outPutAudioWarInstruct21(root21I):
-    global outputInstruct21
+def outPutAudioWarInstruct21():
+    global outputInstruct21, process21
     while True:
         while outputInstruct21.empty() == False:
             msg = outputInstruct21.get(0)
             myobj = gTTS(text=msg, lang='en', tld='us', slow=False)  
             myobj.save("test.mp3")
-            os.system("mpg123 test.mp3")   
-            root21I.destroy()
+            process21 = subprocess.Popen(["mpg123", "test.mp3"])
             return
 
-def instructions21(rootIN, audioChoice):
-    root21I = Toplevel(rootIN)
+def instructions21(audioChoice):
+    global process21
+    root21I = Tk()
     root21I.title('Instructions 21')
     root21I['background']='#8B0000'
     root21I.geometry("1000x1000")
@@ -43,9 +44,9 @@ def instructions21(rootIN, audioChoice):
     If playing with audio, At any time say 'yes' to hit and say 'no' to stand. To quit say 'quit' or close out window."
 
     instructionString =  "Rules of 21:\
-    Cards values of 2-9 are worth 2pts-9pts, respectively.\
+    Cards values of 2-9 are worth 2points-9points, respectively.\
     King, Jack, and Queen are each worth 10pts. \
-    Aces are worth 1pt or 11pts, depending what is most benefical to the player\n\n\
+    Aces are worth 1point or 11points, depending what is most benefical to the player\n\n\
     \
     The player is dealt two cards face up.\
     The dealer is dealt 1 card face up and one face down..\
@@ -65,5 +66,10 @@ def instructions21(rootIN, audioChoice):
     placeApplication.place(relx= 0, rely=.6)
     if audioChoice:
         outputInstruct21.put(instructionString)
-        audioSpeakerThread = threading.Thread(target=outPutAudioWarInstruct21, args=(root21I, ))
+        audioSpeakerThread = threading.Thread(target=outPutAudioWarInstruct21)
         audioSpeakerThread.start()
+    root21I.mainloop()
+
+    print("hey")
+    process21.terminate()
+         

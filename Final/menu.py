@@ -6,13 +6,13 @@ import queue, threading
 from GUI21 import main21
 from warGUI import intialize
 from globalFunctions import *
-
-global rootMenu,  outPutMenu, endMenu, btnWar, btn21, warning, warningOut
+import subprocess
+global rootMenu,  outPutMenu, endMenu, btnWar, btn21, warning, warningOut, process
 warningOut = 0
 endMenu = 0 #when the menu is gonna be quit so we can end the threads
 outPutMenu = queue.Queue()  # output queue will hold messages that a thread will output with voice
 def outPutAudioMenu():
-    global outPutMenu, endMenu, var
+    global outPutMenu, endMenu, var, process
     while True:
         if var.get() != 0 and warningOut:
             warning.destroy() #warning that no audio choice is selected can be removed
@@ -22,12 +22,9 @@ def outPutAudioMenu():
             msg = outPutMenu.get(0)
             myobj = gTTS(text=msg, lang='en', tld='us', slow=False)
             myobj.save("test.mp3")
-            btn21['state'] = DISABLED
-            btnWar['state'] = DISABLED #to avoid voice overlaying from mpg
-            os.system("mpg123 test.mp3")
-            btn21['state'] = NORMAL
-            btnWar['state'] = NORMAL
+            process = subprocess.Popen(["mpg123", "test.mp3"])
 
+         
 
 #Thread function- changes the audio setting and chooses game based on user voice input
 def audioListenerMenu():
@@ -37,6 +34,9 @@ def audioListenerMenu():
     while True:
         msg = getInput(("audio", "silent", "silence", "first", "second", "quit"))
         print(msg)
+        if endMenu:
+            return
+    
         if msg == "quit":
             quitMenu()
             return
@@ -58,18 +58,19 @@ def audioListenerMenu():
         if msg == "second":
             btnWar.invoke()
             return
-        if endMenu:
-            return
-    
+
 def quitMenu():
     global rootMenu
     global endMenu
+    process.terminate()
+
     endMenu = 1
     rootMenu.destroy()
 
 
 def choose_21():
-    global outputMenu, endMenu, rootMenu, warning, warningOut
+    global outputMenu, endMenu, rootMenu, warning, warningOut, process
+    process.terminate()
     value = var.get()
     if value == 0:
         outPutMenu.put("No audio choice selected. Say 'audio' or 'silent' or click the radio buttons")
@@ -84,6 +85,8 @@ def choose_21():
 
 def choose_war():
     global outPutMenu, endMenu, warning, warningOut
+    process.terminate()
+
     value = var.get()
     if value == 0:
         outPutMenu.put("No audio choice selected. Say 'audio' or 'silent' or click the radio buttons")
@@ -98,7 +101,7 @@ def choose_war():
     return
 
 def main():
-    global outPutMenu, endMenu, var, rootMenu, btnWar, btn21
+    global outPutMenu, endMenu, var, rootMenu, btnWar, btn21, process
     listenerThread = threading.Thread(target=audioListenerMenu) #listener thread 
     listenerThread.start()
     rootMenu = Tk()
@@ -131,11 +134,12 @@ def main():
     slientButton = Radiobutton(rootMenu, text ="Silent",  font=("Helvetica", 50), variable=var, value=2)
     slientButton.place(relx = .55, rely = .3)
     #actual buttons for the options 21 and war
-    btn21 = Button(rootMenu, text =" 21 ", font=("Helvetica", 50), command=lambda: choose_21(), state=DISABLED)
+    btn21 = Button(rootMenu, text =" 21 ", font=("Helvetica", 50), command=lambda: choose_21())
     btn21.place(relx = .05, rely = .55)
-    btnWar = Button(rootMenu, text ="WAR", font=("Helvetica", 50), command=lambda: choose_war(), state=DISABLED)
+    btnWar = Button(rootMenu, text ="WAR", font=("Helvetica", 50), command=lambda: choose_war())
     btnWar.place(relx = .55, rely = .55)
     rootMenu.mainloop()
+    process.terminate()
     endMenu = 1 #this code will only be reached if user uses x to close the window
     return
 if __name__ == "__main__":
