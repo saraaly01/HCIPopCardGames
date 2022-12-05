@@ -22,9 +22,9 @@ def instructions21(rootIN, audioChoice):
     root21I['background']='#8B0000'
     root21I.geometry("1000x1000")
     instructionsGeneral = "Rules of 21:\n \
-    Cards values of 2-9 are worth 2pts-9pts, respectively.\n\
-    King, Jack, and Queen are each worth 10pts.\n \
-    Aces are worth 1pt or 11pts, depending what is most benefical to the player\n\n\
+    Cards values of 2-9 are worth 2points-9pointts, respectively.\n\
+    King, Jack, and Queen are each worth 10points.\n \
+    Aces are worth 1point or 11points, depending what is most benefical to the player\n\n\
     \
     The player is dealt two cards face up.\n\
     The dealer is dealt 1 card face up and one face down..\n\n\
@@ -63,6 +63,7 @@ def instructions21(rootIN, audioChoice):
     placeGeneral.place(relx= 0, rely=0)
     placeApplication = Label(root21I, text = instructionsApplication, font=("Comic Sans MS", 12),  bg='#8B0000')
     placeApplication.place(relx= 0, rely=.6)
-    outputInstruct21.put(instructionString)
-    audioSpeakerThread = threading.Thread(target=outPutAudioWarInstruct21, args=(root21I, ))
-    audioSpeakerThread.start()
+    if audioChoice:
+        outputInstruct21.put(instructionString)
+        audioSpeakerThread = threading.Thread(target=outPutAudioWarInstruct21, args=(root21I, ))
+        audioSpeakerThread.start()

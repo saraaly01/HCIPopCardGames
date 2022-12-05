@@ -16,7 +16,7 @@ def outPutAudioWarInstructWar(rootWarI):
             rootWarI.destroy()
             return
 
-def instructionsWar(rootIN):
+def instructionsWar(rootIN, audioChoice):
     global outputInstructWar
     rootWarI = Toplevel(rootIN)
     rootWarI.title('Instructions War')
@@ -29,9 +29,10 @@ def instructionsWar(rootIN):
     Whoever ends up with no cards first, loses! With audio selected, Press the flip button to flip your card (the computer will flip their card too).\n \
     If playing with audio say flip to do the same. When a war commences, say war to continue or hit the war button. \n\
     At any point, if playing with audio say score to see how many cards the player and computer have each."
-    outputInstructWar.put(instructionString)
-    audioSpeakerThreadWar = threading.Thread(target=outPutAudioWarInstructWar, args=(rootWarI, ))
-    audioSpeakerThreadWar.start()
+    if audioChoice:
+        outputInstructWar.put(instructionString)
+        audioSpeakerThreadWar = threading.Thread(target=outPutAudioWarInstructWar, args=(rootWarI, ))
+        audioSpeakerThreadWar.start()
 
 
 

@@ -6,10 +6,10 @@ import speech_recognition as sr
 import os, sys, time
 from gtts import gTTS
 import queue, threading
-from instructionsWar import instructionsWar
+from instructionsWar import *
 from globalFunctions import *
 
-global outputWAR, endWAR
+global outputWAR, endWAR, audioFromMenu
 global computer_hand, player_hand, cardPlayedP, cardPlayedC, cardBackPlayer, cardBackComputer
 global rootWar, warWait, flip
 endWAR= 0 #signals the endWARof the game
@@ -50,7 +50,7 @@ def audioListenerWar():
         if msg== "score": #prints out how many cards each player has
             outputWAR.put("You have" + str(player_hand.size) + "cards. Computer has" + str(computer_hand.size) + "cards.")
         if msg == "instructions" or msg == "help" or msg == "instruction":
-            instructionsWar(rootWar)
+            instructionsWar(rootWar, audioFromMenu)
         if msg == "quit" or endWAR: #ends the program
             quitWar()
             return
@@ -251,9 +251,10 @@ def finish():
 
     return
 
-def intialize(audioFromMenu):
-    global rootWar, labels, flip, outputWAR, endWAR
+def intialize(audio):
+    global rootWar, labels, flip, outputWAR, endWAR, audioFromMenu
     global cardBackPlayer, cardBackComputer,  cardPlayedP, cardPlayedC, computer_hand, player_hand
+    audioFromMenu = audio
     labels = []
     deck = pydealer.Deck()
     deck.shuffle()
@@ -286,10 +287,10 @@ def intialize(audioFromMenu):
     cardBack = Image.open("cards\\card.png")
     cardBack = cardBack.resize((int(250/2.5),int(363/2.5)))
     cardBack = ImageTk.PhotoImage(cardBack)
-    cardBackPlayer= Label(rootWar, image=cardBack)
+    cardBackPlayer= Label(rootWar, image=cardBack,  borderwidth=0, highlightthickness=0)
     cardBackPlayer.image = cardBack
     cardBackPlayer.place(relx=0.02, rely=.3)
-    cardBackComputer = Label(rootWar, image=cardBack)
+    cardBackComputer = Label(rootWar, image=cardBack,  borderwidth=0, highlightthickness=0)
     cardBackComputer.image = cardBack
     cardBackComputer.place(relx=.9, rely=.3)
 
@@ -300,7 +301,7 @@ def intialize(audioFromMenu):
     computerNumCards = Label(cardBackComputer, text = str(computer_hand.size), font=("Comic Sans MS", 20))
     computerNumCards.place(relx= 0, rely=0)
     labels.append(computerNumCards)
-    instructionButton = Button(rootWar, text="?", font=("Comic Sans MS",30), command=lambda: instructionsWar(rootWar))
+    instructionButton = Button(rootWar, text="?", font=("Comic Sans MS",30), command=lambda: instructionsWar(rootWar, audioFromMenu))
     instructionButton.place(relx = .8,rely = .8)
 
     flip = Button(rootWar, text ="FLIP", command=lambda: flipCard())

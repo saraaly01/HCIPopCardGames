@@ -6,7 +6,7 @@ import speech_recognition as sr
 import os, sys, time
 from gtts import gTTS
 import queue, threading
-from instructions21 import instructions21
+from instructions21 import *
 from globalFunctions import *
 global root, hitButton, standButton, flippedCard, end21, outPut, playAgainButton, standCalled, audioChoice
 
@@ -70,7 +70,7 @@ def hitAction():
     global root, xPlayer, player_hand, deck
     tempCard = deck.deal(1)  # deals one card
     output.put("You got a " + str(tempCard))  # computer outputs that they got this card
-    tempCardimg = insertImage(str(tempCard))
+    tempCardimg = insertImage(str(tempCard), root)
     tempCardimg.place(relx=.12 + xPlayer, rely=.3)  # card is added to the GUI
     player_hand += tempCard  # card is added to the players hand
     xPlayer += .05  # variable represents where to place the card x wise, is incremented for the next card to be placed
@@ -91,7 +91,7 @@ def standAction():
     standButton['state'] = DISABLED
     # next three lines of code destroys the flipped card image on the GUI of the Dealer's hand and puts the front facing version
     flippedCard.destroy()
-    flippedCard = insertImage(str(dealer_hand[1]))
+    flippedCard = insertImage(str(dealer_hand[1]), root)
     flippedCard.place(relx=.58, rely=.3)
     output.put(
         "The dealer's hidden card was a" + str(dealer_hand[1]) + "Their score is now" + str(hand_score(dealer_hand)))
@@ -103,7 +103,7 @@ def standAction():
         output.put("Dealer receives a " + str(tempCard) + "there score is now" + str(hand_score(dealer_hand)))
         dealerScore = Label(root, text=str(hand_score(dealer_hand)), font=("Comic Sans MS", 20))
         dealerScore.place(relx=.8, rely=.1)
-        tempCardimg = insertImage(str(tempCard))
+        tempCardimg = insertImage(str(tempCard), root)
         tempCardimg.place(relx=.7 + xDealer, rely=.3)
         xDealer += .05
     dealerScore = Label(root, text=str(hand_score(dealer_hand)), font=("Comic Sans MS", 20))
@@ -111,19 +111,6 @@ def standAction():
     finish()  # calls finish function for results and score
     return
 
-
-def insertImage(cardPlayed):
-    # function avoids redundant code by taking in the card and getting the label ready to place on the GUI
-    global root
-    width = int(
-        250 / 2.5)  # the width and height of the cards are resized because the actual jpeg file is too big for the screen
-    height = int(363 / 2.5)
-    cardOutput = Image.open("cards\\" + str(cardPlayed) + ".png")
-    test = cardOutput.resize((width, height))
-    test = ImageTk.PhotoImage(test)
-    imglabel = Label(root, image=test)
-    imglabel.image = test
-    return imglabel
 
 def quit():
     global end21 
@@ -224,7 +211,7 @@ def main21(audioFromMenu):
     dealer.place(relx=.7, rely=.1)
 
     # inserts the flipped card (backside) of the dealer's on the dealers side of the GUI
-    cardBack = insertImage("card")
+    cardBack = insertImage("card", root)
     cardBack.place(relx=.43, rely=.15)
 
 
@@ -244,9 +231,9 @@ def main21(audioFromMenu):
     playerScore = Label(root, text=str(hand_score(player_hand)), font=("Comic Sans MS", 20))
     playerScore.place(relx=.3, rely=.1)  # places the player score on the screen
 
-    imgPlayed = insertImage(dealer_hand[0])  # inserts the showing card of the Dealer's on the screen
+    imgPlayed = insertImage(dealer_hand[0], root)  # inserts the showing card of the Dealer's on the screen
     imgPlayed.place(relx=0.67, rely=.3)
-    flippedCard = insertImage("card")  # inserts the flipped card (backside)on the Dealer's side
+    flippedCard = insertImage("card", root)  # inserts the flipped card (backside)on the Dealer's side
     flippedCard.place(relx=.58, rely=.3)
 
     # buttons on the screen to press to hit, stand with the functions to call if the buttons are pressed
@@ -269,7 +256,7 @@ def main21(audioFromMenu):
     output.put("Welcome to 21.")
     # displays the players card
     for card in player_hand:
-        imgPlayed = insertImage(card)
+        imgPlayed = insertImage(card, root)
         imgPlayed.place(relx=0.12 + xPlayer, rely=.3)
         xPlayer += .05  # increments the x value to space out the cards on GUI
         output.put("You have a " + str(card))

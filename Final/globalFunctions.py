@@ -59,13 +59,13 @@ def getInput(desiredWords):
             return "-"
         except sr.UnknownValueError:
             return "-"
-def insertImage(cardPlayed,rootWar):
+def insertImage(cardPlayed,rootType):
     width = int(250/2.5)
     height = int(363/2.5)
     cardOutput = Image.open("cards\\" + str(cardPlayed) + ".png")
     test = cardOutput.resize((width, height))
     test = ImageTk.PhotoImage(test)
-    imglabel = Label(rootWar, image=test, borderwidth=0, highlightthickness=0)
+    imglabel = Label(rootType, image=test, borderwidth=0, highlightthickness=0)
     imglabel.image = test
     return imglabel
 
