@@ -16,7 +16,7 @@ def outPutAudioWarInstructWar(rootWarI):
             rootWarI.destroy()
             return
 
-def instructionsWar(rootIN, audioChoice):
+def instructionsWar(rootIN,audioChoice):
     global outputInstructWar
     rootWarI = Toplevel(rootIN)
     rootWarI.title('Instructions War')

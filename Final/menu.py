@@ -7,14 +7,15 @@ from GUI21 import main21
 from warGUI import intialize
 from globalFunctions import *
 
-global rootMenu,  outPutMenu, endMenu, btnWar, btn21, warning
-endMenu = 0
+global rootMenu,  outPutMenu, endMenu, btnWar, btn21, warning, warningOut
+warningOut = 0
+endMenu = 0 #when the menu is gonna be quit so we can end the threads
 outPutMenu = queue.Queue()  # output queue will hold messages that a thread will output with voice
 def outPutAudioMenu():
     global outPutMenu, endMenu, var
     while True:
-        if var.get() != 0:
-            warning.destroy()
+        if var.get() != 0 and warningOut:
+            warning.destroy() #warning that no audio choice is selected can be removed
         if endMenu:
             return
         while outPutMenu.empty() == False:
@@ -22,7 +23,7 @@ def outPutAudioMenu():
             myobj = gTTS(text=msg, lang='en', tld='us', slow=False)
             myobj.save("test.mp3")
             btn21['state'] = DISABLED
-            btnWar['state'] = DISABLED
+            btnWar['state'] = DISABLED #to avoid voice overlaying from mpg
             os.system("mpg123 test.mp3")
             btn21['state'] = NORMAL
             btnWar['state'] = NORMAL
@@ -42,12 +43,14 @@ def audioListenerMenu():
         if msg == "audio":
             #audioChoice = "Vaudio" #!!differentiate audio from button and audio from voice
             var.set(1)
-            warning.destroy()
+            if warningOut:
+                warning.destroy()
             outPutMenu.put("Audio Selected")
         elif msg == "silent" or msg == "silence":
             #audioChoice = "Vsilent" #!!differentiate audio from button and audio from voice
             var.set(2)
-            warning.destroy()
+            if warningOut:
+                warning.destroy()
             outPutMenu.put("Silent Selected")
         if msg == "first":
             btn21.invoke()
@@ -66,12 +69,13 @@ def quitMenu():
 
 
 def choose_21():
-    global outputMenu, endMenu, rootMenu, warning
+    global outputMenu, endMenu, rootMenu, warning, warningOut
     value = var.get()
     if value == 0:
         outPutMenu.put("No audio choice selected. Say 'audio' or 'silent' or click the radio buttons")
         warning = Label(rootMenu, text= "No audio choice selected. Say 'audio' or 'silent' or click the radio buttons", font=("Arial", 10))
         warning.place(relx= .1, rely= .25)
+        warningOut = 1
     else:
         rootMenu.destroy()
         endMenu = 1
@@ -79,12 +83,14 @@ def choose_21():
     return
 
 def choose_war():
-    global outPutMenu, endMenu, warning
+    global outPutMenu, endMenu, warning, warningOut
     value = var.get()
     if value == 0:
         outPutMenu.put("No audio choice selected. Say 'audio' or 'silent' or click the radio buttons")
         warning = Label(rootMenu, text= "No audio choice selected. Say 'audio' or 'silent' or click the radio buttons", font=("Arial", 10))
         warning.place(relx= .1, rely= .25)
+        warningOut = 1
+
     else:
         rootMenu.destroy()
         endMenu = 1
@@ -93,9 +99,8 @@ def choose_war():
 
 def main():
     global outPutMenu, endMenu, var, rootMenu, btnWar, btn21
-    listenerThread = threading.Thread(target=audioListenerMenu)
+    listenerThread = threading.Thread(target=audioListenerMenu) #listener thread 
     listenerThread.start()
-  
     rootMenu = Tk()
     rootMenu.title('PLAY')
     rootMenu['background']='#8B0000'
@@ -109,24 +114,29 @@ def main():
     ##THREAD SECTION
     gameTitle = Label(rootMenu, text= "POPCARD GAMES", font=("Cooper Black", 50))
     gameTitle.place(relx= .2, rely= 0)
-    var = IntVar()
+    var = IntVar() #tkinter variable to keep track of which radio button is selected
     var.set(0)
-    audioSpeakerThread = threading.Thread(target=outPutAudioMenu)
+    audioSpeakerThread = threading.Thread(target=outPutAudioMenu) #speaker thread
     audioSpeakerThread.start()
+    #adds to output queue for text to speech for audio feedback
     outPutMenu.put("Welcome to PopCard Games. At anytime say silent or audio to choose game play mode. Then say first to choose 21 and second to choose war")
+    #adds to gui for visual feedback
     menuInstruction = Label(rootMenu, text= "Welcome to PopCard Games. At anytime say silent or audio to choose game play mode or click the respective button.\
     THEN say first to choose 21 and second to choose war.", font=("Arial", 10))
     menuInstruction.place(relx= .1, rely= .2)
+
+    #radio buttons for the options of audio and silent
     audioButton = Radiobutton(rootMenu, text ="Audio", font=("Helvetica", 50), variable=var, value=1)
     audioButton.place(relx = 0.05, rely = .3)
     slientButton = Radiobutton(rootMenu, text ="Silent",  font=("Helvetica", 50), variable=var, value=2)
     slientButton.place(relx = .55, rely = .3)
+    #actual buttons for the options 21 and war
     btn21 = Button(rootMenu, text =" 21 ", font=("Helvetica", 50), command=lambda: choose_21(), state=DISABLED)
     btn21.place(relx = .05, rely = .55)
     btnWar = Button(rootMenu, text ="WAR", font=("Helvetica", 50), command=lambda: choose_war(), state=DISABLED)
     btnWar.place(relx = .55, rely = .55)
     rootMenu.mainloop()
-    endMenu = 1
+    endMenu = 1 #this code will only be reached if user uses x to close the window
     return
 if __name__ == "__main__":
     main()
