@@ -88,7 +88,7 @@ def main():
     listenerThread.start()
     audioSpeakerThread = threading.Thread(target=outPutAudioMenu)
     audioSpeakerThread.start()
-    outPutMenu.put("Welcome to PopCard Games. Say silent or audio to choose game play mode. Then say first to choose 21 and second to choose war")
+    outPutMenu.put("Welcome to PopCard Games. At anytime say silent or audio to choose game play mode. Then say first to choose 21 and second to choose war")
     rootMenu = Tk()
     rootMenu.title('PLAY')
     rootMenu['background']='#8B0000'
@@ -103,10 +103,11 @@ def main():
     gameTitle = Label(rootMenu, text= "POPCARD GAMES", font=("Cooper Black", 80))
     gameTitle.place(relx= .2, rely= 0)
     var = IntVar()
+
     audioButton = Radiobutton(rootMenu, text ="Audio", font=("Helvetica", 50), variable=var, value=1)
-    audioButton.place(relx = 0.05, rely = .2)
+    audioButton.place(relx = 0.05, rely = .3)
     slientButton = Radiobutton(rootMenu, text ="Slient",  font=("Helvetica", 50), variable=var, value=2)
-    slientButton.place(relx = .55, rely = .2)
+    slientButton.place(relx = .55, rely = .3)
     btn21 = Button(rootMenu, text =" 21 ", font=("Helvetica", 50), command=lambda: choose_21())
     btn21.place(relx = .05, rely = .55)
     btnWar = Button(rootMenu, text ="WAR", font=("Helvetica", 50), command=lambda: choose_war())

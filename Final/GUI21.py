@@ -17,6 +17,7 @@ deck = pydealer.Deck()  # card deck
 
 # outPutAudio is one of the worker functions
 def outPutAudio():
+    global output, root, playAgainButton
     while True:  # thread is constantly checking if there is a message on the queue it has to output
         while output.empty() == False:  # if the queue is not empty the thread will get ready to output the message
             msg = output.get(0)
@@ -27,7 +28,8 @@ def outPutAudio():
             myobj.save("test.mp3")
             os.system("mpg123 test.mp3")
         if end21:  # if the game has been end21ed the thread can be terminated
-            playAgainButton['state'] = NORMAL
+            playAgainButton = Button(root, text="Play Again", font=("Comic Sans MS", 15), command=lambda: playAgain())
+            playAgainButton.place(relx=.45, rely=.7)
             return
         else:  # else allow the hit and stand buttons to be used again
             hitButton['state'] = NORMAL
@@ -254,9 +256,6 @@ def main21(audioFromMenu):
     standButton = Button(root, text="STAND", font=("Comic Sans MS", 15), command=lambda: standAction())
     standButton.place(relx=.6, rely=.7)
 
-    playAgainButton = Button(root, text="Play Again", font=("Comic Sans MS", 15), command=lambda: playAgain(),
-                             state=DISABLED)
-    playAgainButton.place(relx=.45, rely=.7)
 
     instructionButton = Button(root, text="?", font=("Comic Sans MS",30), command=lambda: instructions21(root))
     instructionButton.place(relx = .8,rely = .8)
