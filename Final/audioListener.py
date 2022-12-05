@@ -1,4 +1,6 @@
 import speech_recognition as sr
+from gtts import gTTS
+import os, sys, time
 import re
 
 # If the function is acting up. Uncomment lines 29 and 30 in order to see more of whats happening.
@@ -18,31 +20,39 @@ import re
 def getInput(desiredWords):    
     r = sr.Recognizer()
     mic = sr.Microphone()
-    with mic as source:
-        audio = r.listen(source)
-    try:
-        rawAudioInput = r.recognize_google(audio, language="en")
-        print("raw output" + rawAudioInput)
-        #splits the audio into a list of words
-        splitInput = re.split("[\W]+", rawAudioInput)
-        # print("Raw Audio Input: ", rawAudioInput)
-        # print("Split input: ", splitInput)
+    with mic as source:   
+        try:
+            audio = r.listen(source)
+            rawAudioInput = r.recognize_google(audio, language="en")
+            print("raw output" + rawAudioInput)
+            #splits the audio into a list of words
+            splitInput = re.split("[\W]+", rawAudioInput)
+            # print("Raw Audio Input: ", rawAudioInput)
+            # print("Split input: ", splitInput)
 
-        # keeps track of all the words from desiredWords that were found in the audio input
-        foundWord = ""
+            # keeps track of all the words from desiredWords that were found in the audio input
+            foundWord = ""
+            
+            for inputWord in splitInput:
+                for desiredWord in desiredWords:
+                    # if the current word from the input is a match:
+                    if inputWord.lower() == desiredWord.lower():
+                        foundWord = inputWord
+
+            
+            if foundWord == "":
+                myobj = gTTS(text="Sorry, I did'nt quite get that.", lang='en', tld='us', slow=False)
+                myobj.save("test.mp3")
+                os.system("mpg123 test.mp3")
+                return "No desired word was found."
+            else:
+                return foundWord
         
-        for inputWord in splitInput:
-            for desiredWord in desiredWords:
-                # if the current word from the input is a match:
-                if inputWord.lower() == desiredWord.lower():
-                    foundWord = inputWord
-        
-        if foundWord == "":
-            return "No desired word was found."
-        else:
-            return foundWord
-    except:
-        return "-"
+        #implements error handling in case the audio parser throws an error
+        except sr.RequestError:
+            return "-"
+        except sr.UnknownValueError:
+            return "-"
 
 
 
