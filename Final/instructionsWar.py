@@ -2,22 +2,24 @@ from tkinter import *
 import speech_recognition as sr
 import os, sys, time
 from gtts import gTTS
-import queue, threading
+import queue, threading, subprocess
+
+global outPutAudioWarInstructWar, instructionProcess
 outputInstructWar =  queue.Queue() 
+
 def outPutAudioWarInstructWar(rootWarI):
-    global outputInstructWar
+    global outputInstructWar, instructionProcess
     while True:
         while outputInstructWar.empty() == False:
             msg = outputInstructWar.get(0)
             myobj = gTTS(text=msg, lang='en', tld='us', slow=False)  
             myobj.save("test.mp3")
-            os.system("mpg123 test.mp3")   
-            rootWarI.destroy()
+            instructionProcess = subprocess.Popen(["mpg123", "test.mp3"])
             return
 
-def instructionsWar(rootIN,audioChoice):
-    global outputInstructWar
-    rootWarI = Toplevel(rootIN)
+def instructionsWar(audioChoice):
+    global outputInstructWar,instructionProcess
+    rootWarI = Tk()
     rootWarI.title('Instructions War')
     rootWarI['background']='#8B0000'
     rootWarI.geometry("1000x1000")
@@ -33,8 +35,6 @@ def instructionsWar(rootIN,audioChoice):
         audioSpeakerThreadWar = threading.Thread(target=outPutAudioWarInstructWar, args=(rootWarI, ))
         audioSpeakerThreadWar.start()
 
-
-
     instructionsGeneral = "Rules of War:\n \
     The deck is split evenly. The player and computer flips a card and the higher card gets both cards.\n\
     If there is a tie, the computer and player flip four cards and the fourth card is compared. \n\
@@ -47,4 +47,5 @@ def instructionsWar(rootIN,audioChoice):
     placeGeneral.place(relx= 0, rely=0)
     placeApplication = Label(rootWarI, text = instructionsApplication, font=("Comic Sans MS", 12),  bg='#8B0000')
     placeApplication.place(relx= 0, rely=.6)
-
+    rootWarI.mainloop()
+    instructionProcess.terminate()

@@ -8,7 +8,7 @@ from gtts import gTTS
 import queue, threading, subprocess
 from instructions21 import *
 from globalFunctions import *
-global root, hitButton, standButton, flippedCard, end21, outPut, playAgainButton, standCalled, audioChoice, process
+global root, hitButton, standButton, flippedCard, end21, outPut, playAgainButton, standCalled, audioChoice, process21
 
 output = queue.Queue()  # output queue will hold messages that a thread will output with voice
 deck = pydealer.Deck()  # card deck
@@ -17,7 +17,7 @@ deck = pydealer.Deck()  # card deck
 
 # outPutAudio is one of the worker functions
 def outPutAudio():
-    global output, root, playAgainButton, process
+    global output, root, playAgainButton, process21
     while True:  # thread is constantly checking if there is a message on the queue it has to output
         while output.empty() == False:  # if the queue is not empty the thread will get ready to output the message
             msg = output.get(0)
@@ -26,7 +26,7 @@ def outPutAudio():
             # next three lines uses google's package for text to speech
             myobj = gTTS(text=msg, lang='en', tld='us', slow=False)
             myobj.save("test.mp3")
-            process = subprocess.Popen(["mpg123", "test.mp3"], universal_newlines=True)
+            process21 = subprocess.Popen(["mpg123", "test.mp3"], universal_newlines=True)
         if end21:  # if the game has been end21ed the thread can be terminated
             playAgainButton.place(relx=.45, rely=.7)
             return
@@ -37,7 +37,7 @@ def outPutAudio():
 
 # audioListener is the other worker function
 def audioListener():
-    global standCalled, process
+    global standCalled, process21
     standCalled = 0
     while True:  # constantly using the microphone to check if the user is saying something
         msg = getInput(("yes", "no", "quit", "instructions", "help", "instruction", "again"))
@@ -50,10 +50,11 @@ def audioListener():
             standCalled = 1
             standAction()
         if msg == "quit":
+            process21.terminate()
             quit()
             return
         if msg == "instructions" or msg == "help" or msg == "instruction":
-            process.terminate()
+            process21.terminate()
             instructions21(audioChoice)
         if msg == "again":
             playAgainButton.invoke()
@@ -272,11 +273,13 @@ def main21(audioFromMenu):
         output.put("Welcome to 21. At anytime say yes to hit, no to stand, quit to quit, and again to restart.")
     
     if audioChoice == 1:
-        commands21 = Label(root, text= "Welcome to 21. Press hit button or say 'yes' to receive a card and stand or 'no' to stand.\nAt anytime you can say 'quit' or 'restart'.", font=("Arial", 10))
+        commands21 = Label(root, text= "Welcome to 21. Press hit button or say 'yes' to receive a card and stand or 'no' to stand.\nAt anytime you can say 'quit' or 'restart'.\nPress the '?' button for instructions or say 'help' or 'instructions'", font=("Arial", 10))
     elif audioChoice == 2:
-        commands21 = Label(root, text= "Welcome to 21. Press hit button to receive a card and stand to stand.", font=("Arial", 10))
-    commands21.place(relx = .1, rely = .65)
+        commands21 = Label(root, text= "Welcome to 21. Press hit button to receive a card and stand to stand. Press the '?' button for instructions.", font=("Arial", 10))
+    commands21.place(relx = .1, rely = .60)
 
     root.mainloop()
     end21 = 1
+    process21.terminate()
+  
     os._exit(0)

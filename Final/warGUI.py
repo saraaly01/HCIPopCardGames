@@ -5,11 +5,11 @@ import numpy as np
 import speech_recognition as sr
 import os, sys, time
 from gtts import gTTS
-import queue, threading
+import queue, threading, subprocess
 from instructionsWar import *
 from globalFunctions import *
 
-global outputWAR, endWAR, audioFromMenu
+global outputWAR, endWAR, audioFromMenu, process
 global computer_hand, player_hand, cardPlayedP, cardPlayedC, cardBackPlayer, cardBackComputer
 global rootWar, warWait, flip
 endWAR= 0 #signals the endWARof the game
@@ -19,7 +19,7 @@ outputWAR = queue.Queue()  #output queue will hold messages that a thread will o
 
 #outPutAudio is one of the worker functions
 def outPutAudioWar():
-    global flip, outputWAR, endWAR
+    global flip, outputWAR, endWAR, process
     while True: #thread is constantly checking if there is a message on the queue it has to output
         if endWAR:
             return
@@ -29,7 +29,7 @@ def outPutAudioWar():
             #next three lines uses google's package for text to speech
             myobj = gTTS(text=msg, lang='en', tld='us', slow=False)  
             myobj.save("test.mp3")
-            os.system("mpg123 test.mp3")   
+            process = subprocess.Popen(["mpg123", "test.mp3"])
             if not warWait:
                 flip['state'] = NORMAL
     
@@ -37,7 +37,7 @@ def outPutAudioWar():
 
 #audioListener is the other worker function
 def audioListenerWar(): 
-    global outputWAR,endWAR, warWait
+    global outputWAR,endWAR, warWait, process
     while True: #constantly using the microphone to check if the user is saying something
         print("testing")
         msg = getInput(("flip", "war", "score", "instructions", "help", "instruction", "quit"))
@@ -50,14 +50,16 @@ def audioListenerWar():
         if msg== "score": #prints out how many cards each player has
             outputWAR.put("You have" + str(player_hand.size) + "cards. Computer has" + str(computer_hand.size) + "cards.")
         if msg == "instructions" or msg == "help" or msg == "instruction":
-            instructionsWar(rootWar, audioFromMenu)
+            process.terminate()
+            instructionsWar(audioFromMenu)
         if msg == "quit" or endWAR: #ends the program
+            process.terminate()
             quitWar()
             return
 
 def quitWar():
-    global endWar
-    endWar = 1
+    global endWAR
+    endWAR = 1
     rootWar.destroy()
     os._exit(0)
 
@@ -119,9 +121,7 @@ def cardTie():
             img= insertImage(cardPlayedPcurr,rootWar)
             img.place(relx = playerX + (.05 *i), rely = .3)
             labels.append(img)
-
         if computer_hand.size != 0:
-
             cardPlayedCcurr = computer_hand.random_card(remove = True)
             cardPlayedCTie.append(cardPlayedCcurr)
             outputWAR.put("Computer flips a " + str(cardPlayedCcurr))
@@ -143,7 +143,7 @@ def cardTie():
         labels.append(tie)
         player_hand.add(cardPlayedP)
         computer_hand.add(cardPlayedC)
-    elif valueCompareTie == 1:
+    elif valueCompareTie == 1: #player gets cards in the round
         outputWAR.put("You receive the cards")
         playerWin = Label(rootWar, text= "PLAYER's CARDS!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
         playerWin.place(relx =.15, rely = .2)
@@ -154,7 +154,7 @@ def cardTie():
             player_hand.add(cardC)
         player_hand.add(cardPlayedP)
         player_hand.add(cardPlayedC)
-    elif valueCompareTie == 2:
+    elif valueCompareTie == 2: #computer gets cards in the round
         outputWAR.put("Computer receives the cards")
         computerWin = Label(rootWar, text= "COMPUTER's CARDS!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
         computerWin.place(relx =.65, rely = .2)
@@ -163,18 +163,17 @@ def cardTie():
             computer_hand.add(cardP)
         for cardC in cardPlayedCTie:
             computer_hand.add(cardC)
-
         computer_hand.add(cardPlayedP)
         computer_hand.add(cardPlayedC)
     
     flip['state'] = NORMAL
 
-    if computer_hand.size == 0 or player_hand.size == 0 and (warWait == 0):
+    if computer_hand.size == 0 or player_hand.size == 0 and (warWait == 0): #someone ran out of cards
         finish()
     return
 
 
-
+#main function of the program, when card gets flipped
 def flipCard():
     global rootWar, labels
     global cardBackPlayer, cardBackComputer, cardPlayedP, cardPlayedC, computer_hand, player_hand
@@ -183,15 +182,18 @@ def flipCard():
     computer_hand.shuffle()
     player_hand.shuffle()
     
+    #destroys any widgets we do not need from previous round(s)
     for label in labels:
         label.destroy()
  
+    #updates the visual feedback for the number of cards and adds it to the label array so we can delete in the future
     playerNumCards = Label(cardBackPlayer, text = str(player_hand.size), font=("Comic Sans MS", 20))
     playerNumCards.place(relx= 0, rely=.0)
     labels.append(playerNumCards)
     computerNumCards = Label(cardBackComputer, text = str(computer_hand.size), font=("Comic Sans MS", 20))
     computerNumCards.place(relx= 0, rely=0)
     labels.append(computerNumCards)
+
     if computer_hand.size == 0 or player_hand.size == 0 and (warWait == 0):
         finish()
         return
@@ -238,26 +240,27 @@ def flipCard():
     return
 
 def finish():
+    #game is over, outputs results
     flip.destroy()
     if player_hand.size == 0:
         playerWinsGame = Label(rootWar, text = "COMPUTER WINS. GAME OVER", font=("Comic Sans MS", 40))
         playerWinsGame.place(relx= .4, rely=.6)
         outputWAR("Computer Wins. Game Over")
-
     elif computer_hand.size == 0:
         computerWinsGame = Label(rootWar, text = "PLAYER WINS. GAME OVER", font=("Comic Sans MS", 40))
         computerWinsGame.place(relx= .4, rely=.6)
         outputWAR("Player Wins. Game Over")
-
     return
 
 def intialize(audio):
-    global rootWar, labels, flip, outputWAR, endWAR, audioFromMenu
+    #function intializes the GUI
+    global rootWar, labels, flip, outputWAR, endWAR, audioFromMenu, process
     global cardBackPlayer, cardBackComputer,  cardPlayedP, cardPlayedC, computer_hand, player_hand
     audioFromMenu = audio
     labels = []
     deck = pydealer.Deck()
     deck.shuffle()
+    #intializes hands 
     player_hand = pydealer.Stack()
     player_hand += deck.deal(26)
     computer_hand = pydealer.Stack()
@@ -301,7 +304,7 @@ def intialize(audio):
     computerNumCards = Label(cardBackComputer, text = str(computer_hand.size), font=("Comic Sans MS", 20))
     computerNumCards.place(relx= 0, rely=0)
     labels.append(computerNumCards)
-    instructionButton = Button(rootWar, text="?", font=("Comic Sans MS",30), command=lambda: instructionsWar(rootWar, audioFromMenu))
+    instructionButton = Button(rootWar, text="?", font=("Comic Sans MS",30), command=lambda: instructionsWar(audioFromMenu))
     instructionButton.place(relx = .8,rely = .8)
 
     flip = Button(rootWar, text ="FLIP", command=lambda: flipCard())
@@ -315,7 +318,17 @@ def intialize(audio):
         audioListenerThread = threading.Thread(target=audioListenerWar)
         audioListenerThread.start()
 
-    outputWAR.put("Welcome to War. Say flip anytime to flip card. Say quit anytime to end")
+    #audio ouput
+    outputWAR.put("Welcome to War. Say flip anytime to flip card. Say quit anytime to end. Say score anytime for the score.")
+
+    #visual output
+    if audioFromMenu == 1:
+        commandsWar = Label(rootWar, text= "Welcome to War. Say flip anytime to flip card or press the button. Press the '?' button for instructions or say 'help' or 'instructions'. Say 'score' anytime for the score. Say 'quit' anytime to end.", font=("Arial", 10))
+    elif audioFromMenu == 2:
+        commandsWar = Label(rootWar, text= "Welcome to War. Press the flip button to flip cards. Press the '?' button for instructions.", font=("Arial", 10))
+    commandsWar.place(relx = .1, rely = .65)
+
     rootWar.mainloop()
-    endWAR= 1
+    endWAR =1 
+    process.terminate()
     os._exit(0)

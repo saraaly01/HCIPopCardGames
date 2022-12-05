@@ -4,20 +4,20 @@ import os, sys, time
 from gtts import gTTS
 import queue, threading, subprocess
 
-global process21
+global instructionProcess
 outputInstruct21 =  queue.Queue() 
 def outPutAudioWarInstruct21():
-    global outputInstruct21, process21
+    global outputInstruct21, instructionProcess
     while True:
         while outputInstruct21.empty() == False:
             msg = outputInstruct21.get(0)
             myobj = gTTS(text=msg, lang='en', tld='us', slow=False)  
             myobj.save("test.mp3")
-            process21 = subprocess.Popen(["mpg123", "test.mp3"])
+            instructionProcess = subprocess.Popen(["mpg123", "test.mp3"])
             return
 
 def instructions21(audioChoice):
-    global process21
+    global instructionProcess
     root21I = Tk()
     root21I.title('Instructions 21')
     root21I['background']='#8B0000'
@@ -59,7 +59,9 @@ def instructions21(audioChoice):
     If the player or dealer hand goes over 21, that defines a bust which is a loss.\
     If the player has a higher score than the dealer and less than 21, then the player wins (and vice versa)\
     If the player or dealer hits exactly 21, that defines an automatic win\
-    If the player or dealer have the same score, that defines a push, which is a tie."
+    If the player or dealer have the same score, that defines a push, which is a tie.\n \
+    Press the hit button to receive a card. Press the stand button to stand.\n\
+    If playing with audio, at any time say 'yes' to hit, say 'no' to stand, and say 'score' for the score. To quit say 'quit' or close out window."
     placeGeneral = Label(root21I, text = instructionsGeneral, font=("Comic Sans MS", 12),  bg='#8B0000')
     placeGeneral.place(relx= 0, rely=0)
     placeApplication = Label(root21I, text = instructionsApplication, font=("Comic Sans MS", 12),  bg='#8B0000')
@@ -69,7 +71,5 @@ def instructions21(audioChoice):
         audioSpeakerThread = threading.Thread(target=outPutAudioWarInstruct21)
         audioSpeakerThread.start()
     root21I.mainloop()
-
-    print("hey")
-    process21.terminate()
+    instructionProcess.terminate()
          
