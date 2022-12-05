@@ -7,6 +7,7 @@ import os, sys, time
 from gtts import gTTS
 import queue, threading
 from instructionsWar import instructionsWar
+from audioListener import getInput
 
 global output, endWAR
 global computer_hand, player_hand, cardPlayedP, cardPlayedC, cardBackPlayer, cardBackComputer
@@ -35,15 +36,14 @@ def outPutAudioWar():
 
 
 #audioListener is the other worker function
-def audioListener(): 
-    global output,endWAR
-    r = sr.Recognizer()
-    mic = sr.Microphone()
+def audioListenerWar(): 
+    global output,endWAR, warWait
     while True: #constantly using the microphone to check if the user is saying something
+        print("testing")
         msg = getInput(("flip", "war", "score", "instructions", "help", "instruction", "quit"))
         msg = msg.lower()
         if msg== "flip":  #user picked flip and calls flipCard function if we are not waiting for a war
-            if not warWait:
+            if warWait ==0:
                 flipCard()
         if msg == "war":
             cardTie() #cardTie is the function that deals with the war
@@ -317,10 +317,11 @@ def intialize(audioFromMenu):
     # creates two threads. Listener and Speaker. Listener's worker function continuosuly listens for output.
     # Speaker's work function continuously looks if they need to output something
     if audioFromMenu == 1:   
-        audioListenerThread = threading.Thread(target=audioListener)
-        audioListenerThread.start()
         audioSpeakerThread = threading.Thread(target=outPutAudioWar)
         audioSpeakerThread.start()
+        audioListenerThread = threading.Thread(target=audioListenerWar)
+        audioListenerThread.start()
+
     output.put("Welcome to War. Say flip anytime to flip card. Say quit anytime to end")
     rootWar.mainloop()
     endWAR= 1

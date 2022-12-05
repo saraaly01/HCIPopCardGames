@@ -1,11 +1,12 @@
 from tkinter import *
+from customtkinter import *
 import speech_recognition as sr
 import os, sys, time
 from gtts import gTTS
 import queue, threading
 from GUI21 import main21
 from warGUI import intialize
-from audioListener import *
+from audioListener import getInput
 global rootMenu,  outPutMenu, var, endMenu, btnWar, btn21
 endMenu = 0
 outPutMenu = queue.Queue()  # output queue will hold messages that a thread will output with voice
@@ -30,7 +31,7 @@ def audioListenerMenu():
         msg = getInput(("audio", "silent", "silence", "first", "second", "quit"))
         print(msg)
         if msg == "quit":
-            quit()
+            quitMenu()
             return
         if msg == "audio":
             #audioChoice = "Vaudio" #!!differentiate audio from button and audio from voice
@@ -48,7 +49,7 @@ def audioListenerMenu():
         if endMenu:
             return
     
-def quit():
+def quitMenu():
     global rootMenu
     global endMenu
     endMenu = 1
@@ -56,24 +57,25 @@ def quit():
 
 
 def choose_21():
-    global outputMenu, endMenu
-    print(var.get())
-    if var.get() == 0:
-        outPutMenu.put("No audio choice selected. Say 'audio' or 'silent' or click the radio buttons")
+    global outputMenu, endMenu, rootMenu
+    value = var.get()
+    if value == 0:
+        outPutMenu.put("No audio choice selected. Say 'audio' or 'silent' or click the radio buttons")# put visually
     else:
         rootMenu.destroy()
         endMenu = 1
-        main21(var.get())
+        main21(value)
     return
 
 def choose_war():
     global outPutMenu, endMenu
-    if var.get() == 0:
+    value = var.get()
+    if value == 0:
         outPutMenu.put("No audio choice selected. Say 'audio' or 'silent' or click the radio buttons")
     else:
         rootMenu.destroy()
         endMenu = 1
-        intialize(var.get())
+        intialize(value)
     return
 
 def main():
@@ -93,19 +95,18 @@ def main():
     # set rootWar winow to screen size           
     rootMenu.geometry("%dx%d" % (window_width,  window_height))
     rootMenu.state("zoomed")
-
     ##THREAD SECTION
-    gameTitle = Label(rootMenu, text= "POPCARD GAMES", font=("Comic Sans MS", 30))
-    gameTitle.place(relx = 0.3, rely = 0)
+    gameTitle = Label(rootMenu, text= "POPCARD GAMES", font=("Cooper Black", 80))
+    gameTitle.place(relx= .2, rely= 0)
     var = IntVar()
-    audioButton = Radiobutton(rootMenu, text ="Audio", variable=var, value=1)
-    audioButton.place(relx = .2, rely = .3)
-    slientButton = Radiobutton(rootMenu, text ="Slient", variable=var, value=2)
-    slientButton.place(relx = .2, rely = .35)
-    btn21 = Button(rootMenu, text ="21", font=("Comic Sans MS", 30), command=lambda: choose_21())
-    btn21.place(relx = .2, rely = .55)
-    btnWar = Button(rootMenu, text ="WAR", font=("Comic Sans MS", 30), command=lambda: choose_war())
-    btnWar.place(relx = .75, rely = .55)
+    audioButton = Radiobutton(rootMenu, text ="Audio", font=("Helvetica", 50), variable=var, value=1)
+    audioButton.place(relx = 0.05, rely = .2)
+    slientButton = Radiobutton(rootMenu, text ="Slient",  font=("Helvetica", 50), variable=var, value=2)
+    slientButton.place(relx = .55, rely = .2)
+    btn21 = Button(rootMenu, text =" 21 ", font=("Helvetica", 50), command=lambda: choose_21())
+    btn21.place(relx = .05, rely = .55)
+    btnWar = Button(rootMenu, text ="WAR", font=("Helvetica", 50), command=lambda: choose_war())
+    btnWar.place(relx = .55, rely = .55)
     rootMenu.mainloop()
     endMenu = 1
     return

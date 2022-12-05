@@ -38,8 +38,6 @@ def outPutAudio():
 def audioListener():
     global standCalled
     standCalled = 0
-    r = sr.Recognizer()
-    mic = sr.Microphone()
     while True:  # constantly using the microphone to check if the user is saying something
         msg = getInput(("yes", "no", "quit", "instructions", "help", "instruction", "again"))
         msg = msg.lower()

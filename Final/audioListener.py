@@ -15,9 +15,7 @@ import re
 
 # Note: getInput function will not work if a word in desiredWords is a contraction such as don't, isn't or mustn't
 # I can make this function work with contractions in the future, but I'll do it once there is no other work to do.
-def getInput(desiredWords):
-
-    
+def getInput(desiredWords):    
     r = sr.Recognizer()
     mic = sr.Microphone()
     with mic as source:
@@ -38,18 +36,13 @@ def getInput(desiredWords):
                 # if the current word from the input is a match:
                 if inputWord.lower() == desiredWord.lower():
                     foundWord = inputWord
-
         
         if foundWord == "":
             return "No desired word was found."
         else:
             return foundWord
-    
-    #implements error handling in case the audio parser throws an error
-    except sr.RequestError:
-        return "error"
-    except sr.UnknownValueError:
-        return "unable to recognize speech"
+    except:
+        return "-"
 
 
 
