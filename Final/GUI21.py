@@ -10,6 +10,7 @@ from instructions21 import instructions21
 from audioListener import getInput
 
 global root, hitButton, standButton, flippedCard, end21, outPut, playAgainButton, standCalled, audioChoice
+global rootInstructionWindow, instructionString
 output = queue.Queue()  # output queue will hold messages that a thread will output with voice
 deck = pydealer.Deck()  # card deck
 
@@ -28,7 +29,6 @@ def outPutAudio():
             myobj.save("test.mp3")
             os.system("mpg123 test.mp3")
         if end21:  # if the game has been end21ed the thread can be terminated
-            playAgainButton = Button(root, text="Play Again", font=("Comic Sans MS", 15), command=lambda: playAgain())
             playAgainButton.place(relx=.45, rely=.7)
             return
         else:  # else allow the hit and stand buttons to be used again
@@ -38,7 +38,7 @@ def outPutAudio():
 
 # audioListener is the other worker function
 def audioListener():
-    global standCalled
+    global standCalled, rootInstructionWindow, instructionString
     standCalled = 0
     while True:  # constantly using the microphone to check if the user is saying something
         msg = getInput(("yes", "no", "quit", "instructions", "help", "instruction", "again"))
@@ -54,7 +54,8 @@ def audioListener():
             quit()
             return
         if msg == "instructions" or msg == "help" or msg == "instruction":
-            instructions21(root)
+            rootInstructionWindow, instructionString = instructions21(root)
+            output.put(instructionString)
         if msg == "again" and standCalled:
             playAgain()
             return
@@ -166,7 +167,7 @@ def hand_score(x):
 
 def finish():
     # function wraps up game by determing result and outputing the result
-    global end21
+    global end21, playAgainButton
     playerScore = hand_score(player_hand)
     dealerScore = hand_score(dealer_hand)
     output.put("Your final score is " + str(playerScore) + "The dealer's final score is" + str(dealerScore))
@@ -188,8 +189,8 @@ def finish():
     output.put("The result of the game is " + result)
     output.put("Say again to play again or say quit to quit.")
     end21 = 1  # global end21 variable is assigned so that playagin button can pop up
-    if audioChoice == 2:
-        playAgainButton['state'] = NORMAL
+    playAgainButton.place(relx=.45, rely=.7)
+
 
 
 
@@ -274,7 +275,7 @@ def main21(audioFromMenu):
         imgPlayed.place(relx=0.12 + xPlayer, rely=.3)
         xPlayer += .05  # increments the x value to space out the cards on GUI
         output.put("You have a " + str(card))
-    
+    playAgainButton = Button(root, text="Play Again", font=("Comic Sans MS", 15), command=lambda: playAgain())
     output.put("Your hand score is " + str(hand_score(player_hand)))
     output.put("Dealer card showing is a " + str(dealer_hand[0]))
 
