@@ -9,3 +9,4 @@
 - pip install SpeechRecognition
 - pip install gTTS
 
+- pip install customtkinter
