@@ -325,5 +325,4 @@ def intialize(audioFromMenu):
     output.put("Welcome to War. Say flip anytime to flip card. Say quit anytime to end")
     rootWar.mainloop()
     endWAR= 1
-    return
-    
+    os._exit(0)

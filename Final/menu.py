@@ -19,7 +19,11 @@ def outPutAudioMenu():
             msg = outPutMenu.get(0)
             myobj = gTTS(text=msg, lang='en', tld='us', slow=False)
             myobj.save("test.mp3")
+            btn21['state'] = DISABLED
+            btnWar['state'] = DISABLED
             os.system("mpg123 test.mp3")
+            btn21['state'] = NORMAL
+            btnWar['state'] = NORMAL
 
 
 #Thread function- changes the audio setting and chooses game based on user voice input
