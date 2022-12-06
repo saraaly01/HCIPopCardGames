@@ -10,6 +10,8 @@ Install python (a version atleast 3.10.6 will work)
 - pip install pydealer
 - pip install SpeechRecognition
 - pip install gTTS
+- pip install pyaudio
+- pip install numpy
 
 The mpg123 files do not need to be installed as they are already in the working directory. 
 
