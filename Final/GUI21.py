@@ -285,7 +285,7 @@ def main21(audioFromMenu):
         output.put("Welcome to 21. At anytime say yes to hit, no to stand, quit to quit, and again to restart.")
     
     if audioChoice == 1:
-        commands21 = Label(root, text= "Welcome to 21. Press hit button or say 'yes' to receive a card and stand or 'no' to stand.\nAt anytime you can say 'quit' to quit or 'again' to restart.\nPress the '?' button for instructions or say 'help' or 'instructions'",font=("Tahoma", 20),  bg='#8B0000', foreground="white")
+        commands21 = Label(root, text= "Welcome to 21. Press hit or say 'yes' to receive a card, or press stand or say 'no' to stand.\nAt anytime you can say 'quit' to quit or 'again' to restart.\n Press the '?' button for instructions or say 'help' or 'instructions'",font=("Tahoma", 20),  bg='#8B0000', foreground="white")
     elif audioChoice == 2:
         commands21 = Label(root, text= "Welcome to 21. \nPress hit button to receive a card and stand to stand.\n Press the '?' button for instructions.", font=("Tahoma", 20),  bg='#8B0000', foreground="white")
     commands21.place(relx= .5, rely= .89, anchor=CENTER)
