@@ -1,6 +1,6 @@
 # HCIPopCardGames
 
-## PopCard Games is an accesible card game hub.
+## PopCard Games is an accessible card game hub.
    The program offers the games 21 and War. The games can be played with and without voice and sound. The program uses tkinter for the GUI, and multithreading and subprocesses along with Google's text to speech and speech recognition for the voice/sound feature. 
  
 ## Installations
