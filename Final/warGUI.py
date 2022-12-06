@@ -12,6 +12,7 @@ from globalFunctions import *
 global outputWAR, endWAR, audioFromMenu, process
 global computer_hand, player_hand, cardPlayedP, cardPlayedC, cardBackPlayer, cardBackComputer
 global rootWar, warWait, flip
+
 endWAR= 0 #signals the endWARof the game
 warWait = 0 #variable determines if we are awaiting a war sequence 
 outputWAR = queue.Queue()  #output queue will hold messages that a thread will output with voice
@@ -50,10 +51,12 @@ def audioListenerWar():
         if msg== "score": #prints out how many cards each player has
             outputWAR.put("You have" + str(player_hand.size) + "cards. Computer has" + str(computer_hand.size) + "cards.")
         if msg == "instructions" or msg == "help" or msg == "instruction":
-            process.terminate()
+            if audioFromMenu == 1:
+                process.terminate()
             instructionsWar(audioFromMenu)
         if msg == "quit" or endWAR: #ends the program
-            process.terminate()
+            if audioFromMenu == 1:
+                process.terminate()
             quitWar()
             return
 
@@ -134,8 +137,8 @@ def cardTie():
 
     if valueCompareTie == 0: # cards are equal 
         outputWAR.put("Tie again. Everyone gets their cards back.")
-        tie = Label(rootWar, text= "TIE, CARDS BACK!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
-        tie.place(relx =.45, rely = .2)
+        tie = Label(rootWar, text= "TIE, CARDS BACK!", font=("Tahoma", 30), bg ='#8B0000', foreground="white")
+        tie.place(relx= .5, rely= .74, anchor=CENTER)
         for cardP in cardPlayedPTie:
             player_hand.add(cardP)
         for cardC in cardPlayedCTie:
@@ -145,8 +148,8 @@ def cardTie():
         computer_hand.add(cardPlayedC)
     elif valueCompareTie == 1: #player gets cards in the round
         outputWAR.put("You receive the cards")
-        playerWin = Label(rootWar, text= "PLAYER's CARDS!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
-        playerWin.place(relx =.15, rely = .2)
+        playerWin =Label(rootWar, text= "PLAYER GETS CARDS!", font=("Tahoma", 30), bg ='#8B0000', foreground="white")
+        playerWin.place(relx= .5, rely= .74, anchor=CENTER)
         labels.append(playerWin)
         for cardP in cardPlayedPTie:
             player_hand.add(cardP)
@@ -156,8 +159,8 @@ def cardTie():
         player_hand.add(cardPlayedC)
     elif valueCompareTie == 2: #computer gets cards in the round
         outputWAR.put("Computer receives the cards")
-        computerWin = Label(rootWar, text= "COMPUTER's CARDS!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
-        computerWin.place(relx =.65, rely = .2)
+        computerWin = Label(rootWar, text= "COMPUTER GETS CARDS!", font=("Tahoma", 30), bg ='#8B0000', foreground="white")
+        computerWin.place(relx= .5, rely= .74, anchor=CENTER)
         labels.append(computerWin)
         for cardP in cardPlayedPTie:
             computer_hand.add(cardP)
@@ -187,10 +190,10 @@ def flipCard():
         label.destroy()
  
     #updates the visual feedback for the number of cards and adds it to the label array so we can delete in the future
-    playerNumCards = Label(cardBackPlayer, text = str(player_hand.size), font=("Comic Sans MS", 20))
+    playerNumCards = Label(cardBackPlayer, text = str(player_hand.size), font=("Tahoma", 20))
     playerNumCards.place(relx= 0, rely=.0)
     labels.append(playerNumCards)
-    computerNumCards = Label(cardBackComputer, text = str(computer_hand.size), font=("Comic Sans MS", 20))
+    computerNumCards = Label(cardBackComputer, text = str(computer_hand.size), font=("Tahoma", 20))
     computerNumCards.place(relx= 0, rely=0)
     labels.append(computerNumCards)
 
@@ -211,18 +214,18 @@ def flipCard():
     valueCompare = compareCards(str(cardPlayedP), str(cardPlayedC))
     if valueCompare == 0: # cards are equal 
         outputWAR.put("Cards Tied. Say WAR to continue. ")
-        tie = Label(rootWar, text= "TIE, WAR!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
-        tie.place(relx =.45, rely = .2)
+        tie = Label(rootWar, text= "TIE, WAR!",  font=("Tahoma", 30), bg ='#8B0000', foreground="white")
+        tie.place(relx= .5, rely= .74, anchor=CENTER)
         labels.append(tie)
-        waitWarButton = Button(rootWar, text ="WAR", command=lambda: cardTie())
-        waitWarButton.place(relx=.45, rely = .85)
+        waitWarButton = Button(rootWar, text ="WAR", font=("Tahoma",25), relief=RIDGE, command=lambda: cardTie())
+        waitWarButton.place(relx=.462, rely = .43)
         labels.append(waitWarButton)
         warWait = 1
 
     if valueCompare == 1:
         outputWAR.put("You receive the cards")
-        playerWin = Label(rootWar, text= "PLAYER's CARDS!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
-        playerWin.place(relx =.15, rely = .2)
+        playerWin = Label(rootWar, text= "PlAYER GETS CARDS!", font=("Tahoma", 30), bg ='#8B0000', foreground="white")
+        playerWin.place(relx= .5, rely= .74, anchor=CENTER)
         labels.append(playerWin)
         player_hand.add(cardPlayedC)
         player_hand.add(cardPlayedP)
@@ -230,8 +233,8 @@ def flipCard():
 
     elif valueCompare == 2: #computer won the card
         outputWAR.put("Computer receives the cards")
-        computerWin = Label(rootWar, text= "COMPUTER's CARDS!", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
-        computerWin.place(relx =.65, rely = .2)
+        computerWin = Label(rootWar, text= "COMPUTER GETS CARDS!", font=("Tahoma", 30), bg ='#8B0000', foreground="white")
+        computerWin.place(relx= .5, rely= .74, anchor=CENTER)
         labels.append(computerWin)
 
         computer_hand.add(cardPlayedC)
@@ -243,13 +246,13 @@ def finish():
     #game is over, outputs results
     flip.destroy()
     if player_hand.size == 0:
-        playerWinsGame = Label(rootWar, text = "COMPUTER WINS. GAME OVER", font=("Comic Sans MS", 40))
-        playerWinsGame.place(relx= .4, rely=.6)
-        outputWAR("Computer Wins. Game Over")
+        playerWinsGame = Label(rootWar, text = "COMPUTER WINS. GAME OVER", font=("Tahoma", 40), bg='#8B0000', foreground="white")
+        playerWinsGame.place(relx= .5, rely= .74, anchor=CENTER)
+        outPutAudioWar("Computer Wins. Game Over")
     elif computer_hand.size == 0:
-        computerWinsGame = Label(rootWar, text = "PLAYER WINS. GAME OVER", font=("Comic Sans MS", 40))
-        computerWinsGame.place(relx= .4, rely=.6)
-        outputWAR("Player Wins. Game Over")
+        computerWinsGame = Label(rootWar, text = "PLAYER WINS. GAME OVER",font=("Tahoma", 40), bg='#8B0000', foreground="white")
+        computerWinsGame.place(relx= .5, rely= .74, anchor=CENTER)
+        outPutAudioWar("Player Wins. Game Over")
     return
 
 def intialize(audio):
@@ -278,14 +281,14 @@ def intialize(audio):
     rootWar.geometry("%dx%d" % (window_width,  window_height))
     rootWar.state("zoomed")
 
-    
-    gameTitle = Label(rootWar, text= "WAR", font=("Comic Sans MS", 30))
-    gameTitle.place(relx = 0.45, rely = 0)
 
-    player = Label(rootWar, text= "PLAYER", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
-    player.place(relx =.2, rely = .1)
-    computer = Label(rootWar, text= "COMPUTER", font=("Comic Sans MS", 20), bg ='#8B0000', relief="solid")
-    computer.place(relx =.7, rely = .1)
+    gameTitle = Label(rootWar, text= "WAR", font = ("Cooper Black", 80),  bg='#8B0000', foreground="white")
+    gameTitle.place(relx = .5, rely = .13, anchor=CENTER)
+
+    player = Label(rootWar, text= "PLAYER", font=("Tahoma", 40), bg='#8B0000', foreground="white")
+    player.place(relx =.17, rely = .2)
+    computer = Label(rootWar,  text= "PLAYER", font=("Tahoma", 40), bg='#8B0000', foreground="white")
+    computer.place(relx =.65, rely = .2)
 
     cardBack = Image.open("cards\\card.png")
     cardBack = cardBack.resize((int(250/2.5),int(363/2.5)))
@@ -304,11 +307,11 @@ def intialize(audio):
     computerNumCards = Label(cardBackComputer, text = str(computer_hand.size), font=("Comic Sans MS", 20))
     computerNumCards.place(relx= 0, rely=0)
     labels.append(computerNumCards)
-    instructionButton = Button(rootWar, text="?", font=("Comic Sans MS",30), command=lambda: instructionsWar(audioFromMenu))
-    instructionButton.place(relx = .8,rely = .8)
+    instructionButton = Button(rootWar, text="?", font=("Tahoma",30), relief=RIDGE, command=lambda: instructionsWar(audioFromMenu))
+    instructionButton.place(relx = .95,rely = .85)
 
-    flip = Button(rootWar, text ="FLIP", command=lambda: flipCard())
-    flip.place(relx=.45, rely = .8)
+    flip = Button(rootWar, text ="FLIP",  font=("Tahoma",25), relief=RIDGE, command=lambda: flipCard())
+    flip.place(relx=.465, rely = .3)
 
     # creates two threads. Listener and Speaker. Listener's worker function continuosuly listens for output.
     # Speaker's work function continuously looks if they need to output something
@@ -323,12 +326,13 @@ def intialize(audio):
 
     #visual output
     if audioFromMenu == 1:
-        commandsWar = Label(rootWar, text= "Welcome to War. Say flip anytime to flip card or press the button. Press the '?' button for instructions or say 'help' or 'instructions'. Say 'score' anytime for the score. Say 'quit' anytime to end.", font=("Arial", 10))
+        commandsWar = Label(rootWar, text= "Welcome to War. Say flip anytime to flip card or press the button. Press the '?' button for instructions or say 'help' or 'instructions'. Say 'score' anytime for the score. Say 'quit' anytime to end.",  font=("Tahoma", 20),  bg='#8B0000', foreground="white")
     elif audioFromMenu == 2:
-        commandsWar = Label(rootWar, text= "Welcome to War. Press the flip button to flip cards. Press the '?' button for instructions.", font=("Arial", 10))
-    commandsWar.place(relx = .1, rely = .65)
+        commandsWar = Label(rootWar, text= "Welcome to War. Press the flip button to flip cards. Press the '?' button for instructions.",  font=("Tahoma", 20),  bg='#8B0000', foreground="white")
+    commandsWar.place(relx= .5, rely= .84, anchor=CENTER)
 
     rootWar.mainloop()
     endWAR =1 
-    process.terminate()
+    if audioFromMenu == 1:
+        process.terminate()
     os._exit(0)

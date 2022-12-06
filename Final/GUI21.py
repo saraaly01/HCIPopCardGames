@@ -10,6 +10,8 @@ from instructions21 import *
 from globalFunctions import *
 global root, hitButton, standButton, flippedCard, end21, outPut, playAgainButton, standCalled, audioChoice, process21
 
+process21 = ""
+
 output = queue.Queue()  # output queue will hold messages that a thread will output with voice
 deck = pydealer.Deck()  # card deck
 
@@ -50,11 +52,13 @@ def audioListener():
             standCalled = 1
             standAction()
         if msg == "quit":
-            process21.terminate()
+            if process21 != "":
+                process21.terminate()
             quit()
             return
         if msg == "instructions" or msg == "help" or msg == "instruction":
-            process21.terminate()
+            if process21 != "":
+                process21.terminate()
             instructions21(audioChoice)
         if msg == "again":
             playAgainButton.invoke()
@@ -77,8 +81,8 @@ def hitAction():
     player_hand += tempCard  # card is added to the players hand
     xPlayer += .05  # variable represents where to place the card x wise, is incremented for the next card to be placed
     currPlayerScore = str(hand_score(player_hand))  # the players current score
-    playerScore = Label(root, text=currPlayerScore, font=("Comic Sans MS", 20))
-    playerScore.place(relx=.3, rely=.1)  # the current score is placed/updated
+    playerScore = Label(root, text=str("Points: " +currPlayerScore), font=("Tahoma", 30), bg='#8B0000', foreground="white")
+    playerScore.place(relx =.17, rely = .2) # the current score is placed/updated
     output.put("Your hand score is now " + str(currPlayerScore))  # computer outputs their current score
     if hand_score(player_hand) >= 21:  # if the computer hits 21 or busts stand is automatically called
         standAction()
@@ -94,7 +98,7 @@ def standAction():
     # next three lines of code destroys the flipped card image on the GUI of the Dealer's hand and puts the front facing version
     flippedCard.destroy()
     flippedCard = insertImage(str(dealer_hand[1]), root)
-    flippedCard.place(relx=.58, rely=.3)
+    flippedCard.place(relx=.62, rely=.3)
     output.put(
         "The dealer's hidden card was a" + str(dealer_hand[1]) + "Their score is now" + str(hand_score(dealer_hand)))
     while hand_score(dealer_hand) < 17 and hand_score(player_hand) < 21:
@@ -103,13 +107,13 @@ def standAction():
         tempCard = deck.deal(1)
         dealer_hand += tempCard
         output.put("Dealer receives a " + str(tempCard) + "there score is now" + str(hand_score(dealer_hand)))
-        dealerScore = Label(root, text=str(hand_score(dealer_hand)), font=("Comic Sans MS", 20))
-        dealerScore.place(relx=.8, rely=.1)
+        dealerScore = Label(root, text=str("Points: " +str(hand_score(dealer_hand))), font=("Tahoma", 30), bg='#8B0000', foreground="white")
+        dealerScore.place(relx =.65, rely = .2) 
         tempCardimg = insertImage(str(tempCard), root)
         tempCardimg.place(relx=.7 + xDealer, rely=.3)
         xDealer += .05
-    dealerScore = Label(root, text=str(hand_score(dealer_hand)), font=("Comic Sans MS", 20))
-    dealerScore.place(relx=.8, rely=.1)
+    dealerScore = Label(root, text=str("Points: " +str(hand_score(dealer_hand))), font=("Tahoma", 30), bg='#8B0000', foreground="white")
+    dealerScore.place(relx =.65, rely = .2) 
     finish()  # calls finish function for results and score
     return
 
@@ -171,7 +175,7 @@ def finish():
         result = "Dealer Wins"
     elif playerScore == dealerScore:
         result = "Push. The game is a tie."
-    resultLabel = Label(root, text=result, font=("Comic Sans MS", 20), bg='#8B0000', relief="solid")
+    resultLabel = Label(root, text=result, font=("Tahoma", 35), bg='#8B0000', foreground="white")
     resultLabel.place(relx=.4, rely=.55)
     output.put("The result of the game is " + result)
     output.put("Say again to play again or say quit to quit.")
@@ -204,16 +208,17 @@ def main21(audioFromMenu):
     root.geometry("%dx%d" % (window_width,  window_height))
     root.state("zoomed")
     # segment puts text on the screen
-    gameTitle = Label(root, text="21", font=("Comic Sans MS", 30))
-    gameTitle.place(relx=0.45, rely=0)
-    player = Label(root, text="PLAYER", font=("Comic Sans MS", 20), bg='#8B0000', relief="solid")
-    player.place(relx=.2, rely=.1)
-    dealer = Label(root, text="DEALER", font=("Comic Sans MS", 20), bg='#8B0000', relief="solid")
-    dealer.place(relx=.7, rely=.1)
+    gameTitle = Label(root, text="21", font = ("Cooper Black", 80),  bg='#8B0000', foreground="white")
+    gameTitle.place(relx = .5, rely = .13, anchor=CENTER)
+    player = Label(root,text= "PLAYER", font=("Tahoma", 45), bg='#8B0000', foreground="white")
+    player.place(relx =.17, rely = .1)
+    dealer = Label(root, text="DEALER", font=("Tahoma", 45), bg='#8B0000', foreground="white")
+    dealer.place(relx =.65, rely = .1)
 
     # inserts the flipped card (backside) of the dealer's on the dealers side of the GUI
     cardBack = insertImage("card", root)
-    cardBack.place(relx=.43, rely=.15)
+    cardBack.place(relx=.455, rely = .3)
+
 
 
     deck.shuffle()  # shuffle the deck
@@ -224,28 +229,27 @@ def main21(audioFromMenu):
     player_hand += deck.deal(2)  # deals the player their two cards
 
     currDealerScore = str(hand_score(dealer_hand))
-    dealerScore = Label(root, text=currDealerScore, font=("Comic Sans MS", 20))
-    dealerScore.place(relx=.8,
-                      rely=.1)  # adds the dealers score on the GUI and then deals their second card so that the user doesn't know it
+    dealerScore = Label(root, text=str("Points: " +currDealerScore), font=("Tahoma", 30), bg='#8B0000', foreground="white")
+    dealerScore.place(relx =.65, rely = .2)  # adds the dealers score on the GUI and then deals their second card so that the user doesn't know it
     dealer_hand += deck.deal(1)  # second card
 
-    playerScore = Label(root, text=str(hand_score(player_hand)), font=("Comic Sans MS", 20))
-    playerScore.place(relx=.3, rely=.1)  # places the player score on the screen
+    playerScore = Label(root, text=str("Points: " + str(hand_score(player_hand))), font=("Tahoma", 30), bg='#8B0000', foreground="white")
+    playerScore.place(relx =.17, rely = .2)  # places the player score on the screen
 
     imgPlayed = insertImage(dealer_hand[0], root)  # inserts the showing card of the Dealer's on the screen
     imgPlayed.place(relx=0.67, rely=.3)
     flippedCard = insertImage("card", root)  # inserts the flipped card (backside)on the Dealer's side
-    flippedCard.place(relx=.58, rely=.3)
+    flippedCard.place(relx=.62, rely=.3)
 
     # buttons on the screen to press to hit, stand with the functions to call if the buttons are pressed
-    hitButton = Button(root, text="HIT", font=("Comic Sans MS", 15), command=lambda: hitAction())
-    hitButton.place(relx=.3, rely=.7)
-    standButton = Button(root, text="STAND", font=("Comic Sans MS", 15), command=lambda: standAction())
+    hitButton = Button(root, text="HIT", font=("Tahoma",25), relief=RIDGE,  command=lambda: hitAction())
+    hitButton.place(relx=.32, rely=.7)
+    standButton = Button(root, text="STAND", font=("Tahoma",25), relief=RIDGE,  command=lambda: standAction())
     standButton.place(relx=.6, rely=.7)
 
 
-    instructionButton = Button(root, text="?", font=("Comic Sans MS",30), command=lambda: instructions21(audioChoice))
-    instructionButton.place(relx = .8,rely = .8)
+    instructionButton = Button(root, text="?",font=("Tahoma",30), relief=RIDGE, command=lambda: instructions21(audioChoice))
+    instructionButton.place(relx = .95,rely = .85)
 
     # creates two threads. Listener and Speaker. Listener's worker function continuosuly listens for output.
     # Speaker's work function continuously looks if they need to output something
@@ -261,8 +265,8 @@ def main21(audioFromMenu):
         imgPlayed.place(relx=0.12 + xPlayer, rely=.3)
         xPlayer += .05  # increments the x value to space out the cards on GUI
         output.put("You have a " + str(card))
-    playAgainButton = Button(root, text="RESTART", font=("Comic Sans MS", 15), command=lambda: playAgain())
-    playAgainButton.place(relx=.45, rely=.7)
+    playAgainButton = Button(root, text="RESTART",font=("Tahoma",25), relief=RIDGE, command=lambda: playAgain())
+    playAgainButton.place(relx=.43, rely = .7)
 
     output.put("Your hand score is " + str(hand_score(player_hand)))
     output.put("Dealer card showing is a " + str(dealer_hand[0]))
@@ -273,13 +277,14 @@ def main21(audioFromMenu):
         output.put("Welcome to 21. At anytime say yes to hit, no to stand, quit to quit, and again to restart.")
     
     if audioChoice == 1:
-        commands21 = Label(root, text= "Welcome to 21. Press hit button or say 'yes' to receive a card and stand or 'no' to stand.\nAt anytime you can say 'quit' or 'restart'.\nPress the '?' button for instructions or say 'help' or 'instructions'", font=("Arial", 10))
+        commands21 = Label(root, text= "Welcome to 21. Press hit button or say 'yes' to receive a card and stand or 'no' to stand.\nAt anytime you can say 'quit' or 'restart'.\nPress the '?' button for instructions or say 'help' or 'instructions'",font=("Tahoma", 20),  bg='#8B0000', foreground="white")
     elif audioChoice == 2:
-        commands21 = Label(root, text= "Welcome to 21. Press hit button to receive a card and stand to stand. Press the '?' button for instructions.", font=("Arial", 10))
-    commands21.place(relx = .1, rely = .60)
+        commands21 = Label(root, text= "Welcome to 21. \nPress hit button to receive a card and stand to stand.\n Press the '?' button for instructions.", font=("Tahoma", 20),  bg='#8B0000', foreground="white")
+    commands21.place(relx= .5, rely= .89, anchor=CENTER)
 
     root.mainloop()
     end21 = 1
-    process21.terminate()
+    if process21 != "":
+        process21.terminate()
   
     os._exit(0)
