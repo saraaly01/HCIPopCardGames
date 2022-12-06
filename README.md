@@ -12,5 +12,5 @@
 - pip install gTTS
 -mpg files (already in folder)
 
-##How to run
+## How to run
   After the repository is cloned, you only need to run the "menu.py" file (python menu.py) after moving to the "Final" Directory".
