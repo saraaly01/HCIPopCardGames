@@ -18,4 +18,4 @@ The mpg123 files do not need to be installed as they are already in the working 
  
  pip install tk Pillow pydealer SpeechRecognition gTTS numpy pyaudio
 
- After the repository is cloned, you only need to run the "menu.py" file (python menu.py) after moving to the "Final" Directory".
+ After the repository is cloned, you only need to run the "menu.py" file (python menu.py) after moving into the "Final" directory.
