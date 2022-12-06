@@ -17,7 +17,8 @@ deck = pydealer.Deck()  # card deck
 
 
 
-# outPutAudio is one of the worker functions
+# outPutAudio is one of the worker functions.
+# its job is to output audio to the speaker
 def outPutAudio():
     global output, root, playAgainButton, process21
     while True:  # thread is constantly checking if there is a message on the queue it has to output
@@ -30,7 +31,6 @@ def outPutAudio():
             myobj.save("test.mp3")
             process21 = subprocess.Popen(["mpg123", "test.mp3"], universal_newlines=True)
         if end21:  # if the game has been end21ed the thread can be terminated
-            playAgainButton.place(relx=.45, rely=.7)
             return
         else:  # else allow the hit and stand buttons to be used again
             hitButton['state'] = NORMAL
@@ -38,6 +38,7 @@ def outPutAudio():
 
 
 # audioListener is the other worker function
+# its job is to listen for audio input from the user
 def audioListener():
     global standCalled, process21
     standCalled = 0
@@ -64,18 +65,23 @@ def audioListener():
             playAgainButton.invoke()
             return
 
-
+# in the case that the user signals through voice input or button click to play again, 
+# this function is called. It deconstructs the window, and rebuilds it with a fresh game
 def playAgain():
+    if process21 != "":
+        process21.terminate()
     # this does not work
     root.destroy()
     main21(audioChoice)
 
 
-# function when user wants to hit
+# function that is called when the user signals through voice or button click to 'hit'
 def hitAction():
     global root, xPlayer, player_hand, deck
+    if process21 != "":
+        process21.terminate()
     tempCard = deck.deal(1)  # deals one card
-    output.put("You got a " + str(tempCard))  # computer outputs that they got this card
+    output.put("You chose hit. You got a " + str(tempCard))  # computer outputs that they got this card
     tempCardimg = insertImage(str(tempCard), root)
     tempCardimg.place(relx=.12 + xPlayer, rely=.3)  # card is added to the GUI
     player_hand += tempCard  # card is added to the players hand
@@ -88,10 +94,12 @@ def hitAction():
         standAction()
 
 
-# function if user chooses stand or stand is called
+# function that is called when the user signals through voice or button click to 'stand'
 def standAction():
-    global dealer_hand, deck, xDealer, flippedCard, root, standCalled
+    global dealer_hand, deck, xDealer, flippedCard, root, standCalled, output
     standCalled = 1
+    if process21 != "":
+        process21.terminate()
     # disables hit and stand as they can no longer play
     hitButton['state'] = DISABLED
     standButton['state'] = DISABLED
@@ -117,7 +125,7 @@ def standAction():
     finish()  # calls finish function for results and score
     return
 
-
+# function that is called when the user signals through voice or button click to quit the game
 def quit():
     global end21 
     end21 = 1
@@ -155,10 +163,9 @@ def hand_score(x):
                 score += i
     return score
 
-
+# function wraps up game by determing result and outputing the result
 def finish():
-    # function wraps up game by determing result and outputing the result
-    global end21
+    global end21, output
     playerScore = hand_score(player_hand)
     dealerScore = hand_score(dealer_hand)
     output.put("Your final score is " + str(playerScore) + "The dealer's final score is" + str(dealerScore))
@@ -177,16 +184,17 @@ def finish():
         result = "Push. The game is a tie."
     resultLabel = Label(root, text=result, font=("Tahoma", 35), bg='#8B0000', foreground="white")
     resultLabel.place(relx=.4, rely=.55)
-    output.put("The result of the game is " + result)
-    output.put("Say again to play again or say quit to quit.")
-    end21 = 1  # global end21 variable is assigned so that playagin button can pop up
+    output.put("The result of the game is " + result + ". Say again to play again or say quit to quit or click the restart button.")
+    end21 = 1  # global end21 variable is assigned so that playagain button can pop up
 
 
 
-
+# main function that deals with the control flow for the game
 def main21(audioFromMenu):
     
-    global root, dealer_hand, player_hand, deck, xDealer, xPlayer, hitButton, standButton, flippedCard,  end21, playAgainButton
+    # list of global variables makes it easier to deal with threading, and subprocessing. Due to tkinter's nature, there are many
+    # variables required to deal with threading
+    global root, dealer_hand, player_hand, deck, xDealer, xPlayer, hitButton, standButton, flippedCard, end21, playAgainButton
     global standCalled, audioChoice
     audioChoice = audioFromMenu
     end21 = 0
@@ -277,14 +285,14 @@ def main21(audioFromMenu):
         output.put("Welcome to 21. At anytime say yes to hit, no to stand, quit to quit, and again to restart.")
     
     if audioChoice == 1:
-        commands21 = Label(root, text= "Welcome to 21. Press hit button or say 'yes' to receive a card and stand or 'no' to stand.\nAt anytime you can say 'quit' or 'restart'.\nPress the '?' button for instructions or say 'help' or 'instructions'",font=("Tahoma", 20),  bg='#8B0000', foreground="white")
+        commands21 = Label(root, text= "Welcome to 21. Press hit button or say 'yes' to receive a card and stand or 'no' to stand.\nAt anytime you can say 'quit' to quit or 'again' to restart.\nPress the '?' button for instructions or say 'help' or 'instructions'",font=("Tahoma", 20),  bg='#8B0000', foreground="white")
     elif audioChoice == 2:
         commands21 = Label(root, text= "Welcome to 21. \nPress hit button to receive a card and stand to stand.\n Press the '?' button for instructions.", font=("Tahoma", 20),  bg='#8B0000', foreground="white")
     commands21.place(relx= .5, rely= .89, anchor=CENTER)
 
     root.mainloop()
     end21 = 1
-    if process21 != "":
+    if process21 != "": # if window is exited attempts to close audio 
         process21.terminate()
   
     os._exit(0)

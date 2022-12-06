@@ -18,6 +18,7 @@ def outPutAudioWarInstructWar(rootWarI):
             instructionProcess = subprocess.Popen(["mpg123", "test.mp3"])
             return
 
+#prints and/or speaks the instructions for the game 'war'
 def instructionsWar(audioChoice):
     global outputInstructWar,instructionProcess
     rootWarI = Tk()
@@ -28,11 +29,11 @@ def instructionsWar(audioChoice):
     instructionString = "Rules of War: \
     The deck is split evenly. The player and computer flips a card and the higher card gets both cards.\
     If there is a tie, the computer and player flip four cards and the fourth card is compared.\
-    Whoever has the fourth card gets all the cards played in that round If there is a tie, everyone gets their cards back.\
-    Whoever ends up with no cards first, loses! With audio selected, Press the flip button to flip your card (the computer will flip their card too).\n \
-    If playing with audio say flip to do the same. When a war commences, say war to continue or hit the war button. \n\
-    At any point, if playing with audio say score to see how many cards the player and computer have each."
-    if audioChoice:
+    Whoever has the fourth card gets all the cards played in that round. If there is a tie, everyone gets their cards back.\
+    Whoever ends up with no cards first, loses! Press the flip button to flip your card (the computer will flip their card too).\n \
+    If playing with audio say flip to do the same. When a war commences, say war or hit the war button to continue. \n\
+    At any point, if playing with audio say score to see how many cards the player and computer each have."
+    if audioChoice == 1:
         outputInstructWar.put(instructionString)
         audioSpeakerThreadWar = threading.Thread(target=outPutAudioWarInstructWar, args=(rootWarI, ))
         audioSpeakerThreadWar.start()

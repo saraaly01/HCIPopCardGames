@@ -30,22 +30,17 @@ def getInput(desiredWords):
         try:
             audio = r.listen(source)
             rawAudioInput = r.recognize_google(audio, language="en")
-            print("raw output" + rawAudioInput)
+            #print("raw output " + rawAudioInput) prints raw output
             #splits the audio into a list of words
             splitInput = re.split("[\W]+", rawAudioInput)
-            # print("Raw Audio Input: ", rawAudioInput)
-            # print("Split input: ", splitInput)
-
             # keeps track of all the words from desiredWords that were found in the audio input
             foundWord = ""
-            
             for inputWord in splitInput:
                 for desiredWord in desiredWords:
                     # if the current word from the input is a match:
                     if inputWord.lower() == desiredWord.lower():
                         foundWord = inputWord
 
-            
             if foundWord == "":
                 myobj = gTTS(text="Sorry, I did'nt quite get that.", lang='en', tld='us', slow=False)
                 myobj.save("test.mp3")
@@ -59,6 +54,8 @@ def getInput(desiredWords):
             return "-"
         except sr.UnknownValueError:
             return "-"
+
+#prepares image for label to placed on GUI
 def insertImage(cardPlayed,rootType):
     width = int(250/2.5)
     height = int(363/2.5)
