@@ -44,7 +44,7 @@ def instructions21(audioChoice):
     If the player or dealer have the same score, that defines a push, which is a tie.\n"
     
     instructionsApplication = "Press the hit button to receive a card. Press the stand button to stand.\n\
-    If playing with audio, At any time say 'yes' to hit and say 'no' to stand. To quit say 'quit' or close out window."
+    If playing with audio, at any time say 'yes' to hit, say 'no' to stand,say 'score' for the score and 'quit' to quit. You can also close out the window."
 
     instructionString =  "Rules of 21:\
     Cards values of 2-9 are worth 2points-9points, respectively.\
