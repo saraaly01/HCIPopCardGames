@@ -30,6 +30,7 @@ def outPutAudio():
             myobj = gTTS(text=msg, lang='en', tld='us', slow=False)
             myobj.save("test.mp3")
             process21 = subprocess.Popen(["mpg123", "test.mp3"], universal_newlines=True)
+            process21.wait()
         if end21:  # if the game has been end21ed the thread can be terminated
             return
         else:  # else allow the hit and stand buttons to be used again
@@ -195,7 +196,7 @@ def main21(audioFromMenu):
     # list of global variables makes it easier to deal with threading, and subprocessing. Due to tkinter's nature, there are many
     # variables required to deal with threading
     global root, dealer_hand, player_hand, deck, xDealer, xPlayer, hitButton, standButton, flippedCard, end21, playAgainButton
-    global standCalled, audioChoice
+    global standCalled, audioChoice, output
     audioChoice = audioFromMenu
     end21 = 0
     standCalled = 0
@@ -266,7 +267,11 @@ def main21(audioFromMenu):
         audioListenerThread.start()
         audioSpeakerThread = threading.Thread(target=outPutAudio)
         audioSpeakerThread.start()
-    output.put("Welcome to 21.")
+ 
+    if hand_score(player_hand) == 21:  # if player gets 21 off the bat stand is called
+        standAction()
+    else:
+        output.put("Welcome to 21. At anytime say yes to hit, no to stand, quit to quit, help for instructions, and again to restart.")
     # displays the players card
     for card in player_hand:
         imgPlayed = insertImage(card, root)
@@ -279,10 +284,6 @@ def main21(audioFromMenu):
     output.put("Your hand score is " + str(hand_score(player_hand)))
     output.put("Dealer card showing is a " + str(dealer_hand[0]))
 
-    if hand_score(player_hand) == 21:  # if player gets 21 off the bat stand is called
-        standAction()
-    else:
-        output.put("Welcome to 21. At anytime say yes to hit, no to stand, quit to quit, and again to restart.")
     
     if audioChoice == 1:
         commands21 = Label(root, text= "Welcome to 21. Press hit or say 'yes' to receive a card, or press stand or say 'no' to stand.\nAt anytime you can say 'quit' to quit or 'again' to restart.\n Press the '?' button for instructions or say 'help' or 'instructions'",font=("Tahoma", 20),  bg='#8B0000', foreground="white")

@@ -32,6 +32,7 @@ def outPutAudioWar():
             myobj = gTTS(text=msg, lang='en', tld='us', slow=False)  
             myobj.save("test.mp3")
             process = subprocess.Popen(["mpg123", "test.mp3"])
+            process.wait()
             if not warWait:
                 flip['state'] = NORMAL
     

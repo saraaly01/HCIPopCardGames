@@ -31,8 +31,10 @@ def outPutAudioMenu():
             msg = outPutMenu.get(0)
             myobj = gTTS(text=msg, lang='en', tld='us', slow=False)
             myobj.save("test.mp3")
+
             #uses subprocesss.Popen() instead of os.system() to allow for killing of the audio process when needed
             menuProcess = subprocess.Popen(["mpg123", "test.mp3"])
+            menuProcess.wait()
 
          
 
