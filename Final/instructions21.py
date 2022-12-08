@@ -64,7 +64,7 @@ def instructions21(audioChoice):
     If the player or dealer hits exactly 21, that defines an automatic win\
     If the player or dealer have the same score, that defines a push, which is a tie.\n \
     Press the hit button to receive a card. Press the stand button to stand.\n\
-    If playing with audio, at any time say 'yes' to hit, say 'no' to stand, and say 'score' for the score. To quit say 'quit' or close out window."
+    If playing with audio, at any time say 'yes' to hit, say 'no' to stand,say 'score' for the score and 'quit' to quit. You can also close out the window."
     placeGeneral = Label(root21I, text = instructionsGeneral, font=("Tahoma", 18), bg='#8B0000', foreground="white")
     placeGeneral.place(relx= 0, rely=0)
     placeApplication = Label(root21I, text = instructionsApplication, font=("Tahoma", 18), bg='#8B0000', foreground="white")
